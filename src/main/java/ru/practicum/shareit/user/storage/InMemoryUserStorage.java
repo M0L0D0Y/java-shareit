@@ -43,9 +43,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     private void checkExistId(long id) {
         Set<Long> keySet = userMap.keySet();
-        if (keySet.contains(id)) {
-            User user = userMap.get(id);
-        } else {
+        if (!(keySet.contains(id))) {
             throw new NotFoundException("Нет пользователя с таким id" + id);
         }
     }

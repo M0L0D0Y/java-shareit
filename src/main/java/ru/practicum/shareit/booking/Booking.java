@@ -6,9 +6,6 @@ import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDateTime;
 
-/**
- * // TODO .
- */
 @Data
 public class Booking {
     Long id;

@@ -4,28 +4,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.ecxeption.UserValidException;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.storage.UserStorage;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserIdGenerator generator;
     private final UserStorage userStorage;
+    private final UserMapper userMapper;
 
     @Autowired
-    public UserServiceImpl(UserIdGenerator generator, UserStorage userStorage) {
+    public UserServiceImpl(UserIdGenerator generator, UserStorage userStorage, UserMapper userMapper) {
         this.generator = generator;
         this.userStorage = userStorage;
+        this.userMapper = userMapper;
     }
 
     @Override
-    public User getUser(long id) {
-        return userStorage.getUser(id);
+    public UserDto getUser(long id) {
+        return userMapper.toUserDto(userStorage.getUser(id));
     }
 
     @Override
-    public User addUser(User user) {
+    public UserDto addUser(UserDto userDto) {
+        User user = userMapper.toUser(userDto);
         List<User> userList = userStorage.getAllUser();
         for (User userValid : userList) {
             if (user.getEmail().equals(userValid.getEmail())) {
@@ -33,11 +38,12 @@ public class UserServiceImpl implements UserService {
             }
         }
         user.setId(generator.getId());
-        return userStorage.addUser(user);
+        return userMapper.toUserDto(userStorage.addUser(user));
     }
 
     @Override
-    public User updateUser(long id, User user) {
+    public UserDto updateUser(long id, UserDto userDto) {
+        User user = userMapper.toUser(userDto);
         User userUpdate = userStorage.getUser(id);
         String name = user.getName();
         String email = user.getEmail();
@@ -55,7 +61,7 @@ public class UserServiceImpl implements UserService {
             }
             userUpdate.setEmail(user.getEmail());
         }
-        return userStorage.updateUser(userUpdate);
+        return userMapper.toUserDto(userStorage.updateUser(userUpdate));
     }
 
     @Override
@@ -64,8 +70,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userStorage.getAllUser();
+    public List<UserDto> getAllUsers() {
+        List<User> userList = userStorage.getAllUser();
+        List<UserDto> userDtoList = new LinkedList<>();
+        for (User user : userList) {
+            UserDto userDto = userMapper.toUserDto(user);
+            userDtoList.add(userDto);
+        }
+        return userDtoList;
     }
 
 }

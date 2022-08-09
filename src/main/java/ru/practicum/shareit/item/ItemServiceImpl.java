@@ -3,6 +3,8 @@ package ru.practicum.shareit.item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.ecxeption.ForbiddenException;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.UserService;
 
@@ -16,33 +18,40 @@ public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
     private final UserService userService;
     private final ItemIdGenerator generator;
+    private final ItemMapper itemMapper;
 
     @Autowired
-    public ItemServiceImpl(ItemStorage itemStorage, UserService userService, ItemIdGenerator generator) {
+    public ItemServiceImpl(ItemStorage itemStorage,
+                           UserService userService,
+                           ItemIdGenerator generator,
+                           ItemMapper itemMapper) {
         this.itemStorage = itemStorage;
         this.userService = userService;
         this.generator = generator;
+        this.itemMapper = itemMapper;
     }
 
 
     @Override
-    public Item addItem(long userId, Item item) {
+    public ItemDto addItem(long userId, ItemDto itemDto) {
         userService.getUser(userId);
+        Item item = itemMapper.toItem(itemDto);
         item.setId(generator.getId());
         item.setOwner(userId);
         List<Item> items = new LinkedList<>(itemStorage.getAllItemsByIdOwner(userId));
         items.add(item);
-        return itemStorage.addItem(userId, items);
+        return itemMapper.toItemDto(itemStorage.addItem(userId, items));
     }
 
     @Override
-    public Item updateItem(long userId, long itemId, Item item) {
+    public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         userService.getUser(userId);
+        Item item = itemMapper.toItem(itemDto);
         Item updateItem = itemStorage.getItem(userId, itemId);
         if (updateItem.getOwner() != userId) {
             throw new ForbiddenException("Нет прав для изменения вещи");
         }
-        List<Item> items = new LinkedList<>(getAllItemsByIdOwner(userId));
+        List<Item> items = new LinkedList<>(itemStorage.getAllItemsByIdOwner(userId));
         items.remove(updateItem);
         String name = item.getName();
         String description = item.getDescription();
@@ -57,27 +66,38 @@ public class ItemServiceImpl implements ItemService {
             updateItem.setAvailable(available);
         }
         items.add(updateItem);
-        return itemStorage.updateItem(userId, items);
+        return itemMapper.toItemDto(itemStorage.updateItem(userId, items));
     }
 
     @Override
-    public Item getItem(long userId, long id) {
+    public ItemDto getItem(long userId, long id) {
         userService.getUser(userId);
-        return itemStorage.getItem(userId, id);
+        return itemMapper.toItemDto(itemStorage.getItem(userId, id));
     }
 
     @Override
-    public List<Item> getAllItemsByIdOwner(long userId) {
+    public List<ItemDto> getAllItemsByIdOwner(long userId) {
         userService.getUser(userId);
-        return new LinkedList<>(itemStorage.getAllItemsByIdOwner(userId));
+        List<Item> itemList = itemStorage.getAllItemsByIdOwner(userId);
+        List<ItemDto> itemDtoList = new LinkedList<>();
+        for (Item item : itemList) {
+            itemDtoList.add(itemMapper.toItemDto(item));
+        }
+        return itemDtoList;
+
     }
 
     @Override
-    public List<Item> searchItem(long userId, String text) {
+    public List<ItemDto> searchItem(long userId, String text) {
         userService.getUser(userId);
         if (text.equals(EMPTY_STRING) || text.equals(SPACE_STRING)) {
             return new LinkedList<>();
         }
-        return itemStorage.searchItem(text);
+        List<Item> itemList = itemStorage.searchItem(text);
+        List<ItemDto> itemDtoList = new LinkedList<>();
+        for (Item item : itemList) {
+            itemDtoList.add(itemMapper.toItemDto(item));
+        }
+        return itemDtoList;
     }
 }
