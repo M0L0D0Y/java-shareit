@@ -1,8 +1,11 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.Data;
+import org.springframework.stereotype.Component;
+import ru.practicum.shareit.requests.ItemRequest;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * // TODO .
@@ -10,11 +13,12 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class ItemDto {
     Long id;
-    @NotBlank
+    @NotBlank(message = "Нет названия вещи")
     String name;
-    @NotBlank
+    @NotBlank(message = "Нет описания вещи")
     String description;
-    boolean available;
+    @NotNull(message = "Нет статуса аренды")
+    Boolean available;
     Long owner;
-    Long request;
+    ItemRequest request;
 }
