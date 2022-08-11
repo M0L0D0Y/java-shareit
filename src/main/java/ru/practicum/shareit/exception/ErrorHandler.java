@@ -1,4 +1,4 @@
-package ru.practicum.shareit.ecxeption;
+package ru.practicum.shareit.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleUserValidException(final UserValidException e) {
+    public ErrorResponse handleUserValidationException(final UserValidationException e) {
         return new ErrorResponse("error", e.getMessage());
     }
 

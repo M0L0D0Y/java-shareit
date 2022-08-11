@@ -1,7 +1,7 @@
 package ru.practicum.shareit.user.storage;
 
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.ecxeption.NotFoundException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.User;
 
 import java.util.*;

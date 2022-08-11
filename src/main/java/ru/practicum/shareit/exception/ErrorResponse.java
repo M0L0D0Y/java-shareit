@@ -1,4 +1,4 @@
-package ru.practicum.shareit.ecxeption;
+package ru.practicum.shareit.exception;
 
 import lombok.Data;
 

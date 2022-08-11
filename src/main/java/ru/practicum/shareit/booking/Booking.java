@@ -1,19 +1,17 @@
 package ru.practicum.shareit.booking;
 
 import lombok.Data;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
-import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDateTime;
 
 @Data
 public class Booking {
     Long id;
-    @FutureOrPresent
     LocalDateTime start;
-    @PastOrPresent
     LocalDateTime end;
-    Long item;
-    Long booker;
+    Item item;
+    User booker;
     String status;
 }
