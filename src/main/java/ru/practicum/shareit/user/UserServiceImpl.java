@@ -3,7 +3,6 @@ package ru.practicum.shareit.user;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.UserValidationException;
-import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.List;
