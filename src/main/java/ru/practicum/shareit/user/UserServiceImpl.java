@@ -14,7 +14,7 @@ public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public UserServiceImpl(UserIdGenerator generator, UserStorage userStorage, UserMapper userMapper) {
+    public UserServiceImpl(UserIdGenerator generator, UserStorage userStorage) {
         this.generator = generator;
         this.userStorage = userStorage;
     }
