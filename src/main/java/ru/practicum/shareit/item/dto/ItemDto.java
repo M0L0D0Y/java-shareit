@@ -14,6 +14,6 @@ public class ItemDto {
     String description;
     @NotNull(message = "Нет статуса аренды")
     Boolean available;
-    Long ownerId;
-    Long requestId;
+    /*Long ownerId;
+    Long requestId;*/
 }
