@@ -25,4 +25,15 @@ public class ErrorHandler {
     public ErrorResponse handleForbiddenException(final ForbiddenException e) {
         return new ErrorResponse("error", e.getMessage());
     }
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleUnavailableException(final UnavailableException e) {
+        return new ErrorResponse("error", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleUnsupportedStatusException(final UnsupportedStatusException e) {
+        return new ErrorResponse("Unknown state: UNSUPPORTED_STATUS", e.getMessage());
+    }
 }

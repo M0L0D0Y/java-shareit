@@ -19,7 +19,7 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "name")
+    @Column(name = "name_item")
     private String name;
     @Column(name = "description")
     private String description;
