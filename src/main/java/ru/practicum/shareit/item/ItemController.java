@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoForOwner;
 import ru.practicum.shareit.item.dto.ItemMapper;
 
 import javax.validation.Valid;
@@ -37,16 +38,13 @@ public class ItemController {
     }
 
     @GetMapping(value = "/{itemId}")
-    public ItemDto getItem(@RequestHeader(HEADER_USER_ID) long userId, @PathVariable Long itemId) {
-        return itemMapper.toItemDto(itemService.getItem(userId, itemId));
+    public ItemDtoForOwner getItem(@RequestHeader(HEADER_USER_ID) long userId, @PathVariable Long itemId) {
+        return itemService.getItem(userId, itemId);
     }
 
     @GetMapping
-    public List<ItemDto> getAllItem(@RequestHeader(HEADER_USER_ID) long userId) {
-        return itemService.getAllItemsByIdOwner(userId)
-                .stream()
-                .map(itemMapper::toItemDto)
-                .collect(Collectors.toList());
+    public List<ItemDtoForOwner> getAllItem(@RequestHeader(HEADER_USER_ID) long userId) {
+        return itemService.getAllItemsForOwner(userId);
     }
 
     @GetMapping(value = "/search")

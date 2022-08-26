@@ -15,11 +15,11 @@ import java.util.Objects;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
     @Column(name = "name_user")
-    String name;
+    private String name;
     @Column(name = "email", unique = true)
-    String email;
+    private String email;
 
     @Override
     public boolean equals(Object o) {

@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 public class InputBookingDto {
     @NotNull(message = "Не указана дата начала бронирования")
     @FutureOrPresent(message = "Дата начала бронирования не может быть в прошлом")
-    LocalDateTime start;
+    private LocalDateTime start;
     @NotNull(message = "Не указана дата окончания бронирования")
     @FutureOrPresent(message = "Дата начала бронирования не может быть в прошлом")
-    LocalDateTime end;
+    private LocalDateTime end;
     @NotNull
-    Long itemId;
+    private Long itemId;
 }
