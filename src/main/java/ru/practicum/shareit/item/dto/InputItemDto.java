@@ -6,7 +6,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class ItemDto {
+public class InputItemDto {
     private Long id;
     @NotBlank(message = "Нет названия вещи")
     private String name;

@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnavailableException;
 import ru.practicum.shareit.exception.UnsupportedStatusException;
@@ -108,7 +107,7 @@ public class BookingServiceImpl implements BookingService {
         } catch (IllegalArgumentException e) {
             throw new UnsupportedStatusException("Неподдерживаемый статус");
         }
-
+        LocalDateTime dateTime = LocalDateTime.now();
         List<Booking> bookings = null;
         switch (getState) {
             case ALL:
@@ -116,13 +115,11 @@ public class BookingServiceImpl implements BookingService {
                 log.info("Найдены все брони пользователя");
                 break;
             case PAST:
-                LocalDateTime dateTimePast = LocalDateTime.now();
-                bookings = bookingStorage.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, dateTimePast);
+                bookings = bookingStorage.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, dateTime);
                 log.info("Найдены все завершенные брони пользователя");
                 break;
             case FUTURE:
-                LocalDateTime dateTimeFuture = LocalDateTime.now();
-                bookings = bookingStorage.findByBookerIdAndStartIsAfterOrderByStartDesc(userId, dateTimeFuture);
+                bookings = bookingStorage.findByBookerIdAndStartIsAfterOrderByStartDesc(userId, dateTime);
                 log.info("Найдены все будущие брони пользователя");
                 break;
             case WAITING:
@@ -133,6 +130,9 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingStorage.findByBookerIdAndStatusIsOrderByStartDesc(userId, Status.REJECTED);
                 log.info("Найдены все отклоненные брони пользователя");
                 break;
+            case CURRENT:
+                bookings = bookingStorage.
+                        findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId, dateTime, dateTime);
         }
         return bookings;
     }
@@ -148,6 +148,7 @@ public class BookingServiceImpl implements BookingService {
         }
         List<Booking> bookings = new LinkedList<>();
         List<Item> items = itemStorage.findItemByOwnerId(userId);
+        LocalDateTime dateTime = LocalDateTime.now();
         if (!items.isEmpty()) {
             switch (getState) {
                 case ALL:
@@ -159,20 +160,18 @@ public class BookingServiceImpl implements BookingService {
                     }
                     break;
                 case PAST:
-                    LocalDateTime dateTimePast = LocalDateTime.now();
                     for (Item item : items) {
                         List<Booking> allBookings = bookingStorage
-                                .findByItemIdAndEndIsBefore(item.getId(), dateTimePast);
+                                .findByItemIdAndEndIsBefore(item.getId(), dateTime);
                         if (!allBookings.isEmpty()) {
                             bookings.addAll(allBookings);
                         }
                     }
                     break;
                 case FUTURE:
-                    LocalDateTime dateTimeFuture = LocalDateTime.now();
                     for (Item item : items) {
                         List<Booking> allBookings = bookingStorage
-                                .findByItemIdAndStartIsAfter(item.getId(), dateTimeFuture);
+                                .findByItemIdAndStartIsAfter(item.getId(), dateTime);
                         if (!allBookings.isEmpty()) {
                             bookings.addAll(allBookings);
                         }
@@ -191,6 +190,15 @@ public class BookingServiceImpl implements BookingService {
                     for (Item item : items) {
                         List<Booking> allBookings = bookingStorage
                                 .findByItemIdAndStatusIs(item.getId(), Status.REJECTED);
+                        if (!allBookings.isEmpty()) {
+                            bookings.addAll(allBookings);
+                        }
+                    }
+                    break;
+                case CURRENT:
+                    for (Item item : items) {
+                        List<Booking> allBookings = bookingStorage.
+                                findByItemIdAndStartIsBeforeAndEndIsAfter(item.getId(), dateTime, dateTime);
                         if (!allBookings.isEmpty()) {
                             bookings.addAll(allBookings);
                         }

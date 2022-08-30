@@ -2,9 +2,8 @@ package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoForOwner;
-import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.booking.BookingStorage;
+import ru.practicum.shareit.item.dto.*;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -16,43 +15,62 @@ public class ItemController {
     private static final String HEADER_USER_ID = "X-Sharer-User-Id";
     private final ItemService itemService;
     private final ItemMapper itemMapper;
+    private final CommentMapper commentMapper;
 
     @Autowired
-    public ItemController(ItemService itemService, ItemMapper itemMapper) {
+    public ItemController(ItemService itemService,
+                          ItemMapper itemMapper,
+                          CommentMapper commentMapper) {
         this.itemService = itemService;
         this.itemMapper = itemMapper;
+        this.commentMapper = commentMapper;
     }
 
+
     @PostMapping
-    public ItemDto addItem(@RequestHeader(HEADER_USER_ID) long userId, @Valid @RequestBody ItemDto itemDto) {
-        Item item = itemMapper.toItem(itemDto);
-        return itemMapper.toItemDto(itemService.addItem(userId, item));
+    public OutputItemDto addItem(@RequestHeader(HEADER_USER_ID) Long userId,
+                                 @Valid @RequestBody InputItemDto inputItemDto) {
+        Item item = itemMapper.toItem(inputItemDto);
+        return itemMapper.toOutputItemDto(itemService.addItem(userId, item), userId);
     }
 
     @PatchMapping(value = "/{itemId}")
-    public ItemDto updateItem(@RequestHeader(HEADER_USER_ID) long userId,
-                              @PathVariable Long itemId,
-                              @RequestBody ItemDto itemDto) {
+    public OutputItemDto updateItem(@RequestHeader(HEADER_USER_ID) Long userId,
+                                    @PathVariable Long itemId,
+                                    @RequestBody InputItemDto itemDto) {
         Item item = itemMapper.toItem(itemDto);
-        return itemMapper.toItemDto(itemService.updateItem(userId, itemId, item));
+        return itemMapper.toOutputItemDto(itemService.updateItem(userId, itemId, item), userId);
     }
 
     @GetMapping(value = "/{itemId}")
-    public ItemDtoForOwner getItem(@RequestHeader(HEADER_USER_ID) long userId, @PathVariable Long itemId) {
-        return itemService.getItem(userId, itemId);
+    public OutputItemDtoWithComment getItem(@RequestHeader(HEADER_USER_ID) Long userId, @PathVariable Long itemId) {
+        OutputItemDto outputItemDto = itemMapper.toOutputItemDto(itemService.getItem(userId, itemId), userId);
+        return itemMapper.toOutputItemDtoWithComment(outputItemDto);
     }
 
     @GetMapping
-    public List<ItemDtoForOwner> getAllItem(@RequestHeader(HEADER_USER_ID) long userId) {
-        return itemService.getAllItemsForOwner(userId);
+    public List<OutputItemDtoWithComment> getAllItem(@RequestHeader(HEADER_USER_ID) Long userId) {
+        return itemService.getAllItem(userId)
+                .stream()
+                .map(item -> itemMapper.toOutputItemDto(item, userId))
+                .map(itemMapper::toOutputItemDtoWithComment)
+                .collect(Collectors.toList());
     }
 
     @GetMapping(value = "/search")
-    public List<ItemDto> searchItem(@RequestHeader(HEADER_USER_ID) long userId,
-                                    @RequestParam String text) {
+    public List<OutputItemDto> searchItem(@RequestHeader(HEADER_USER_ID) Long userId,
+                                          @RequestParam String text) {
         return itemService.searchItem(userId, text)
                 .stream()
-                .map(itemMapper::toItemDto)
+                .map(item -> itemMapper.toOutputItemDto(item, userId))
                 .collect(Collectors.toList());
+    }
+
+    @PostMapping(value = "/{itemId}/comment")
+    public OutputCommentDto addComment(@RequestHeader(HEADER_USER_ID) Long userId,
+                                       @PathVariable Long itemId,
+                                       @Valid @RequestBody InputCommentDto inputCommentDto) {
+        Comment comment = commentMapper.toComment(inputCommentDto);
+        return commentMapper.toOutputCommentDto(itemService.addComment(userId, itemId, comment));
     }
 }

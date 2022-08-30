@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.item;
 
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -12,29 +12,26 @@ import java.util.Objects;
 @ToString
 @RequiredArgsConstructor
 @Entity
-@Table(name = "bookings")
-public class Booking {
+@Table(name = "comments")
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    @Column(name = "start_booking")
-    LocalDateTime start;
-    @Column(name = "end_booking")
-    LocalDateTime end;
+    private Long id;
+    @Column(name = "text")
+    private String text;
     @Column(name = "item_id")
-    Long itemId;
-    @Column(name = "booker_id")
-    Long bookerId;
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    Status status;
+    private Long itemId;
+    @Column(name = "author_id")
+    private Long authorId;
+    @Column(name = "created")
+    private LocalDateTime created;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Booking booking = (Booking) o;
-        return id != null && Objects.equals(id, booking.id);
+        Comment comment = (Comment) o;
+        return id != null && Objects.equals(id, comment.id);
     }
 
     @Override

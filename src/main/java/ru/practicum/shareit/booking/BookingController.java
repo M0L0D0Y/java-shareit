@@ -28,21 +28,21 @@ public class BookingController {
     public OutputBookingDto addBooking(@RequestHeader(HEADER_USER_ID) long userId,
                                        @Valid @RequestBody InputBookingDto inputBookingDto) {
         Booking booking = bookingMapper.toBooking(inputBookingDto);
-        return bookingMapper.toOutputBookingDto(bookingService.addBooking(userId, booking));
+        return bookingMapper.toOutputBookingDto(bookingService.addBooking(userId, booking), userId);
     }
 
     @PatchMapping(value = "/{bookingId}")
     public OutputBookingDto approveOwner(@RequestHeader(HEADER_USER_ID) long userId,
                                          @PathVariable Long bookingId,
                                          @RequestParam Boolean approved) {
-        return bookingMapper.toOutputBookingDto(bookingService.approveOwner(userId, bookingId, approved));
+        return bookingMapper.toOutputBookingDto(bookingService.approveOwner(userId, bookingId, approved), userId);
 
     }
 
     @GetMapping(value = "/{bookingId}")
     public OutputBookingDto getBooking(@RequestHeader(HEADER_USER_ID) long userId,
                                        @PathVariable Long bookingId) {
-        return bookingMapper.toOutputBookingDto(bookingService.getBooking(userId, bookingId));
+        return bookingMapper.toOutputBookingDto(bookingService.getBooking(userId, bookingId),userId );
     }
 
     @GetMapping()
@@ -50,7 +50,7 @@ public class BookingController {
                                                       @RequestParam(defaultValue = "ALL") String state) {
         return bookingService.getBookingsByBooker(userId, state)
                 .stream()
-                .map(bookingMapper::toOutputBookingDto)
+                .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
                 .collect(Collectors.toList());
 
     }
@@ -60,7 +60,7 @@ public class BookingController {
                                                      @RequestParam(defaultValue = "ALL") String state) {
         return bookingService.getBookingsByOwner(userId, state)
                 .stream()
-                .map(bookingMapper::toOutputBookingDto)
+                .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
                 .collect(Collectors.toList());
     }
 }
