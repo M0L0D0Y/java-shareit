@@ -3,9 +3,7 @@ package ru.practicum.shareit.item.dto;
 import lombok.Data;
 import ru.practicum.shareit.booking.LastBooking;
 import ru.practicum.shareit.booking.NextBooking;
-import ru.practicum.shareit.item.Comment;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data

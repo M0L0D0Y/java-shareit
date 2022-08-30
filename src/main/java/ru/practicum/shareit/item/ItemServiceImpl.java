@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingStorage;
+import ru.practicum.shareit.booking.BookingService;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnavailableException;
@@ -13,7 +13,9 @@ import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.UserService;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -22,17 +24,17 @@ public class ItemServiceImpl implements ItemService {
     private static final String SPACE_STRING = " ";
     private final ItemStorage itemStorage;
     private final UserService userService;
-    private final BookingStorage bookingStorage;
+    private final BookingService bookingService;
     private final CommentStorage commentStorage;
 
     @Autowired
     public ItemServiceImpl(ItemStorage itemStorage,
                            UserService userService,
-                           BookingStorage bookingStorage,
+                           BookingService bookingService,
                            CommentStorage commentStorage) {
         this.itemStorage = itemStorage;
         this.userService = userService;
-        this.bookingStorage = bookingStorage;
+        this.bookingService = bookingService;
         this.commentStorage = commentStorage;
     }
 
@@ -94,7 +96,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> searchItem(long userId, String text) {
+    public List<Item> searchItemByText(long userId, String text) {
         userService.getUser(userId);
         if (text.equals(EMPTY_STRING) || text.equals(SPACE_STRING)) {
             return new LinkedList<>();
@@ -110,8 +112,8 @@ public class ItemServiceImpl implements ItemService {
         userService.getUser(userId);
         getItem(userId, itemId);
         LocalDateTime dateTime = LocalDateTime.now();
-        List<Booking> bookings = bookingStorage.findByItemIdAndBookerIdAndEndIsBefore(itemId, userId, dateTime);
-        if (bookings.isEmpty()){
+        List<Booking> bookings = bookingService.getBookingsUsedByUser(itemId, userId, dateTime);
+        if (bookings.isEmpty()) {
             throw new UnavailableException("Пользователь не может оставить отзыв на эту вещь");
         }
         comment.setItemId(itemId);
@@ -120,6 +122,10 @@ public class ItemServiceImpl implements ItemService {
         Comment savedCommit = commentStorage.save(comment);
         log.info("Коммент сохранен");
         return savedCommit;
+    }
+
+    public List<Comment> getCommentsByItemID(long itemId) {
+        return commentStorage.findByItemId(itemId);
     }
 
 

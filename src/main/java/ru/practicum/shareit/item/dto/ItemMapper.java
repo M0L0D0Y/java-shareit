@@ -2,13 +2,10 @@ package ru.practicum.shareit.item.dto;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingStorage;
-import ru.practicum.shareit.booking.LastBooking;
-import ru.practicum.shareit.booking.NextBooking;
+import ru.practicum.shareit.booking.*;
 import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.storage.CommentStorage;
+import ru.practicum.shareit.item.ItemService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,16 +13,16 @@ import java.util.stream.Collectors;
 
 @Component
 public class ItemMapper {
-    private final BookingStorage bookingStorage;
-    private final CommentStorage commentStorage;
+    private final BookingService bookingService;
+    private final ItemService itemService;
     private final CommentMapper commentMapper;
 
     @Autowired
-    public ItemMapper(BookingStorage bookingStorage,
-                      CommentStorage commentStorage,
+    public ItemMapper(BookingService bookingService,
+                      ItemService itemService,
                       CommentMapper commentMapper) {
-        this.bookingStorage = bookingStorage;
-        this.commentStorage = commentStorage;
+        this.bookingService = bookingService;
+        this.itemService = itemService;
         this.commentMapper = commentMapper;
     }
 
@@ -61,8 +58,8 @@ public class ItemMapper {
         if (outputItemDto.getNextBooking() != null) {
             outputItemDtoWithComment.setNextBooking(outputItemDto.getNextBooking());
         }
-        List<Comment> comments = commentStorage.findByItemId(outputItemDto.getId());
-        if (!comments.isEmpty()){
+        List<Comment> comments = itemService.getCommentsByItemID(outputItemDto.getId());
+        if (!comments.isEmpty()) {
             comments.sort((o1, o2) -> o2.getId().compareTo(o1.getId()));
         }
         List<OutputCommentDto> outputCommentDtoList = comments.
@@ -75,10 +72,10 @@ public class ItemMapper {
     }
 
     private OutputItemDto addDataTimeLastAndNextBooking(OutputItemDto outputItemDto, long itemId) {
-        List<Booking> bookings = bookingStorage.findByItemId(itemId);
+        List<Booking> bookings = bookingService.getBookingsByItemId(itemId);
         if (!bookings.isEmpty()) {
             LocalDateTime dateTime = LocalDateTime.now();
-            List<Booking> allLastBookings = bookingStorage.findByItemIdAndEndIsBefore(itemId, dateTime);
+            List<Booking> allLastBookings = bookingService.getBookingsByItemIdForPastState(itemId, dateTime);
             if (!allLastBookings.isEmpty()) {
                 if (allLastBookings.size() > 1) {
                     allLastBookings.sort((o1, o2) -> o2.getStart().compareTo(o1.getStart()));
@@ -92,7 +89,7 @@ public class ItemMapper {
                 lastBooking.setBookerId(allLastBookings.get(0).getBookerId());
                 outputItemDto.setLastBooking(lastBooking);
             }
-            List<Booking> allNextBookings = bookingStorage.findByItemIdAndStartIsAfter(itemId, dateTime);
+            List<Booking> allNextBookings = bookingService.getBookingsByItemIdForFutureState(itemId, dateTime);
             if (!allNextBookings.isEmpty()) {
                 if (bookings.size() > 1) {
                     bookings.sort((o1, o2) -> o2.getStart().compareTo(o1.getStart()));

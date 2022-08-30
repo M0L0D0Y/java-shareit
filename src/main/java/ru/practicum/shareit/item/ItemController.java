@@ -2,7 +2,6 @@ package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.BookingStorage;
 import ru.practicum.shareit.item.dto.*;
 
 import javax.validation.Valid;
@@ -58,9 +57,9 @@ public class ItemController {
     }
 
     @GetMapping(value = "/search")
-    public List<OutputItemDto> searchItem(@RequestHeader(HEADER_USER_ID) Long userId,
+    public List<OutputItemDto> searchItemByText(@RequestHeader(HEADER_USER_ID) Long userId,
                                           @RequestParam String text) {
-        return itemService.searchItem(userId, text)
+        return itemService.searchItemByText(userId, text)
                 .stream()
                 .map(item -> itemMapper.toOutputItemDto(item, userId))
                 .collect(Collectors.toList());
