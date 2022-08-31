@@ -8,11 +8,14 @@ import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemService;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class ItemMapper {
+    private static final byte FIRST_ELEMENT = 0;
+    private static final byte MIN_SIZE = 1;
     private final BookingService bookingService;
     private final ItemService itemService;
     private final CommentMapper commentMapper;
@@ -33,7 +36,10 @@ public class ItemMapper {
         outputItemDto.setDescription(item.getDescription());
         outputItemDto.setAvailable(item.getAvailable());
         if (userId == item.getOwnerId()) {
-            return addDataTimeLastAndNextBooking(outputItemDto, outputItemDto.getId());
+            LocalDateTime dateTime = LocalDateTime.now();
+            addLastBooking(outputItemDto, item.getId(), dateTime);
+            addNextBooking(outputItemDto, item.getId(), dateTime);
+            return outputItemDto;
         }
         return outputItemDto;
     }
@@ -71,36 +77,35 @@ public class ItemMapper {
 
     }
 
-    private OutputItemDto addDataTimeLastAndNextBooking(OutputItemDto outputItemDto, long itemId) {
+    private void addLastBooking(OutputItemDto outputItemDto, long itemId, LocalDateTime dateTime) {
         List<Booking> bookings = bookingService.getBookingsByItemId(itemId);
         if (!bookings.isEmpty()) {
-            LocalDateTime dateTime = LocalDateTime.now();
             List<Booking> allLastBookings = bookingService.findAllPastBookingsByItemId(itemId, dateTime);
             if (!allLastBookings.isEmpty()) {
-                if (allLastBookings.size() > 1) {
-                    allLastBookings.sort((o1, o2) -> o2.getStart().compareTo(o1.getStart()));
-                    LastBooking lastBooking = new LastBooking();
-                    lastBooking.setId(allLastBookings.get(allLastBookings.size() - 1).getId());
-                    lastBooking.setBookerId(allLastBookings.get(allLastBookings.size() - 1).getBookerId());
-                    outputItemDto.setLastBooking(lastBooking);
+                if (allLastBookings.size() > MIN_SIZE) {
+                    allLastBookings.sort(Comparator.comparing(Booking::getEnd));
                 }
                 LastBooking lastBooking = new LastBooking();
-                lastBooking.setId(allLastBookings.get(0).getId());
-                lastBooking.setBookerId(allLastBookings.get(0).getBookerId());
+                lastBooking.setId(allLastBookings.get(FIRST_ELEMENT).getId());
+                lastBooking.setBookerId(allLastBookings.get(FIRST_ELEMENT).getBookerId());
                 outputItemDto.setLastBooking(lastBooking);
             }
+        }
+    }
+
+    private void addNextBooking(OutputItemDto outputItemDto, long itemId, LocalDateTime dateTime) {
+        List<Booking> bookings = bookingService.getBookingsByItemId(itemId);
+        if (!bookings.isEmpty()) {
             List<Booking> allNextBookings = bookingService.findAllFutureBookingsByItemId(itemId, dateTime);
             if (!allNextBookings.isEmpty()) {
-                if (bookings.size() > 1) {
+                if (bookings.size() > MIN_SIZE) {
                     bookings.sort((o1, o2) -> o2.getStart().compareTo(o1.getStart()));
                 }
                 NextBooking nextBooking = new NextBooking();
-                nextBooking.setId(allNextBookings.get(0).getId());
-                nextBooking.setBookerId(allNextBookings.get(0).getBookerId());
+                nextBooking.setId(allNextBookings.get(FIRST_ELEMENT).getId());
+                nextBooking.setBookerId(allNextBookings.get(FIRST_ELEMENT).getBookerId());
                 outputItemDto.setNextBooking(nextBooking);
             }
         }
-        return outputItemDto;
     }
-
 }

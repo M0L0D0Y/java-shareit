@@ -30,7 +30,6 @@ public class BookingServiceImpl implements BookingService {
         this.itemStorage = itemStorage;
     }
 
-
     @Override
     public Booking addBooking(long userId, Booking booking) {
         checkExistUser(userId);
@@ -218,11 +217,6 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<Booking> findAllFutureBookingsByItemId(long itemId, LocalDateTime dateTime) {
         return bookingStorage.findAllFutureBookingsByItemId(itemId, dateTime);
-    }
-
-    @Override
-    public List<Booking> findAllPastBookingsByBookerAndItemId(long itemId, long userId, LocalDateTime dateTime) {
-        return bookingStorage.findAllPastBookingsByBookerAndItemId(itemId, userId, dateTime);
     }
 
     private void checkExistUser(long userId) {

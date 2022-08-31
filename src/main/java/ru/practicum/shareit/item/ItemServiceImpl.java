@@ -37,7 +37,6 @@ public class ItemServiceImpl implements ItemService {
         this.bookingStorage = bookingStorage;
     }
 
-
     @Override
     public Item addItem(long userId, Item item) {
         checkExistUser(userId);

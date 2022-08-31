@@ -22,5 +22,4 @@ public interface BookingService {
 
     List<Booking> findAllFutureBookingsByItemId(long itemId, LocalDateTime dateTime);
 
-    List<Booking> findAllPastBookingsByBookerAndItemId(long itemId, long userId, LocalDateTime dateTime);
 }
