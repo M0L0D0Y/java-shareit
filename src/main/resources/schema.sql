@@ -37,4 +37,16 @@ create table if not exists comments
     item_id   bigint references items (id)                        not null,
     author_id bigint references users (id)                        not null,
     created   timestamp with time zone                            not null
-)
+);
+
+alter table users
+    owner to postgres;
+alter table items
+    owner to postgres;
+alter table bookings
+    owner to postgres;
+alter table requests
+    owner to postgres;
+alter table comments
+    owner to postgres;
+
