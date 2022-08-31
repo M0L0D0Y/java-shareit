@@ -4,13 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingService;
+import ru.practicum.shareit.booking.BookingStorage;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnavailableException;
 import ru.practicum.shareit.item.storage.CommentStorage;
 import ru.practicum.shareit.item.storage.ItemStorage;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.user.UserStorage;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -23,24 +23,24 @@ public class ItemServiceImpl implements ItemService {
     private static final String EMPTY_STRING = "";
     private static final String SPACE_STRING = " ";
     private final ItemStorage itemStorage;
-    private final UserService userService;
-    private final BookingService bookingService;
+    private final UserStorage userStorage;
     private final CommentStorage commentStorage;
+    private final BookingStorage bookingStorage;
 
     @Autowired
     public ItemServiceImpl(ItemStorage itemStorage,
-                           UserService userService,
-                           BookingService bookingService,
-                           CommentStorage commentStorage) {
+                           UserStorage userStorage,
+                           CommentStorage commentStorage, BookingStorage bookingStorage) {
         this.itemStorage = itemStorage;
-        this.userService = userService;
-        this.bookingService = bookingService;
+        this.userStorage = userStorage;
         this.commentStorage = commentStorage;
+        this.bookingStorage = bookingStorage;
     }
+
 
     @Override
     public Item addItem(long userId, Item item) {
-        userService.getUser(userId);
+        checkExistUser(userId);
         item.setOwnerId(userId);
         Item savedItem = itemStorage.save(item);
         log.info("Вещь сохранена");
@@ -49,7 +49,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item updateItem(long userId, long itemId, Item item) {
-        userService.getUser(userId);
+        checkExistUser(userId);
         Item updateItem = itemStorage.findById(itemId)
                 .stream()
                 .findAny()
@@ -77,7 +77,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item getItem(long userId, long itemId) {
-        userService.getUser(userId);
+        checkExistUser(userId);
         Item savedItem = itemStorage.findById(itemId)
                 .stream()
                 .findAny()
@@ -88,7 +88,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<Item> getAllItem(long userId) {
-        userService.getUser(userId);
+        checkExistUser(userId);
         List<Item> items = itemStorage.findItemByOwnerId(userId);
         items.sort((Comparator.comparing(Item::getId)));
         log.info("Все вещи пользователя с id = {} найдены", userId);
@@ -97,7 +97,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<Item> searchItemByText(long userId, String text) {
-        userService.getUser(userId);
+        checkExistUser(userId);
         if (text.equals(EMPTY_STRING) || text.equals(SPACE_STRING)) {
             return new LinkedList<>();
         }
@@ -109,10 +109,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Comment addComment(long userId, long itemId, Comment comment) {
-        userService.getUser(userId);
+        checkExistUser(userId);
         getItem(userId, itemId);
         LocalDateTime dateTime = LocalDateTime.now();
-        List<Booking> bookings = bookingService.getBookingsUsedByUser(itemId, userId, dateTime);
+        //TODO попробовать найти без использования BookingService
+        // добавить проверку, что пользователь, который пишет комментарий, действительно брал вещь в аренду.
+        // сделать отдельный сервис для comment?
+        List<Booking> bookings = bookingStorage.findByItemIdAndBookerIdAndEndIsBefore(itemId, userId, dateTime);
         if (bookings.isEmpty()) {
             throw new UnavailableException("Пользователь не может оставить отзыв на эту вещь");
         }
@@ -128,5 +131,10 @@ public class ItemServiceImpl implements ItemService {
         return commentStorage.findByItemId(itemId);
     }
 
-
+    private void checkExistUser(long userId) {
+        userStorage.findById(userId)
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("Пользователя с таким id нет " + userId));
+    }
 }

@@ -7,8 +7,8 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnavailableException;
 import ru.practicum.shareit.exception.UnsupportedStatusException;
 import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.ItemService;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.user.UserStorage;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
@@ -18,23 +18,23 @@ import java.util.List;
 @Service
 public class BookingServiceImpl implements BookingService {
     private final BookingStorage bookingStorage;
-    private final UserService userService;
-    private final ItemService itemService;
+    private final UserStorage userStorage;
+    private final ItemStorage itemStorage;
 
     @Autowired
     public BookingServiceImpl(BookingStorage bookingStorage,
-                              UserService userService,
-                              ItemService itemService) {
+                              UserStorage userStorage,
+                              ItemStorage itemStorage) {
         this.bookingStorage = bookingStorage;
-        this.userService = userService;
-        this.itemService = itemService;
+        this.userStorage = userStorage;
+        this.itemStorage = itemStorage;
     }
 
 
     @Override
     public Booking addBooking(long userId, Booking booking) {
-        userService.getUser(userId);
-        Item item = itemService.getItem(userId, booking.getItemId());
+        checkExistUser(userId);
+        Item item = checkExistItem(booking.getItemId());
         if (!item.getAvailable()) {
             throw new UnavailableException("Вещь недоступна для бронирования");
         }
@@ -53,12 +53,12 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking replyFromOwner(long userId, long bookingId, boolean approved) {
-        userService.getUser(userId);
+        checkExistUser(userId);
         Booking booking = bookingStorage.findById(bookingId)
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Запроса на бронирование с таким id нет " + bookingId));
-        Item item = itemService.getItem(userId, booking.getItemId());
+        Item item = checkExistItem(booking.getItemId());
         if (userId != item.getOwnerId()) {
             throw new NotFoundException("Статус брони может подтвердить только владелец вещи");
         }
@@ -78,12 +78,12 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking getBooking(long userId, long bookingId) {
-        userService.getUser(userId);
+        checkExistUser(userId);
         Booking booking = bookingStorage.findById(bookingId)
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Запроса на бронирование с таким id нет " + bookingId));
-        Item item = itemService.getItem(userId, booking.getItemId());
+        Item item = checkExistItem(booking.getItemId());
         if ((userId != booking.getBookerId()) && (userId != item.getOwnerId())) {
             throw new NotFoundException("Бронь может посмотреть только владелец вещи или создатель брони");
         }
@@ -93,7 +93,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<Booking> getBookingsBooker(long userId, String state) {
-        userService.getUser(userId);
+        checkExistUser(userId);
         State getState;
         try {
             getState = State.valueOf(state);
@@ -132,7 +132,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<Booking> getBookingsOwner(long userId, String state) {
-        userService.getUser(userId);
+        checkExistUser(userId);
         State getState;
         try {
             getState = State.valueOf(state);
@@ -140,7 +140,7 @@ public class BookingServiceImpl implements BookingService {
             throw new UnsupportedStatusException("Неподдерживаемый статус");
         }
         List<Booking> bookings = new LinkedList<>();
-        List<Item> items = itemService.getAllItem(userId);
+        List<Item> items = itemStorage.findItemByOwnerId(userId);
         LocalDateTime dateTime = LocalDateTime.now();
         if (!items.isEmpty()) {
             switch (getState) {
@@ -224,5 +224,19 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<Booking> getBookingsUsedByUser(long itemId, long userId, LocalDateTime dateTime) {
         return bookingStorage.findByItemIdAndBookerIdAndEndIsBefore(itemId, userId, dateTime);
+    }
+
+    private void checkExistUser(long userId) {
+        userStorage.findById(userId)
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("Пользователя с таким id нет " + userId));
+    }
+
+    private Item checkExistItem(long itemId) {
+        return itemStorage.findById(itemId)
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("Нет вещи с таким id" + itemId));
     }
 }
