@@ -68,9 +68,9 @@ public class ItemMapper {
         if (!comments.isEmpty()) {
             comments.sort((o1, o2) -> o2.getId().compareTo(o1.getId()));
         }
-        List<OutputCommentDto> outputCommentDtoList = comments.
-                stream().
-                map(commentMapper::toOutputCommentDto)
+        List<OutputCommentDto> outputCommentDtoList = comments
+                .stream()
+                .map(commentMapper::toOutputCommentDto)
                 .collect(Collectors.toList());
         outputItemDtoWithComment.setComments(outputCommentDtoList);
         return outputItemDtoWithComment;

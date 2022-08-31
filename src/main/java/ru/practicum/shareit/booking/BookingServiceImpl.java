@@ -188,8 +188,8 @@ public class BookingServiceImpl implements BookingService {
                     break;
                 case CURRENT:
                     for (Item item : items) {
-                        List<Booking> allBookings = bookingStorage.
-                                findAllCurrentBookingByItemId(item.getId(), dateTime, dateTime);
+                        List<Booking> allBookings = bookingStorage
+                                .findAllCurrentBookingByItemId(item.getId(), dateTime, dateTime);
                         if (!allBookings.isEmpty()) {
                             bookings.addAll(allBookings);
                         }

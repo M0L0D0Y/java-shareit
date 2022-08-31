@@ -33,8 +33,8 @@ public class BookingController {
 
     @PatchMapping(value = "/{bookingId}")
     public OutputBookingDto replyFromOwner(@RequestHeader(HEADER_USER_ID) long userId,
-                                         @PathVariable Long bookingId,
-                                         @RequestParam Boolean approved) {
+                                           @PathVariable Long bookingId,
+                                           @RequestParam Boolean approved) {
         return bookingMapper.toOutputBookingDto(bookingService.replyFromOwner(userId, bookingId, approved), userId);
 
     }
@@ -42,12 +42,12 @@ public class BookingController {
     @GetMapping(value = "/{bookingId}")
     public OutputBookingDto getBooking(@RequestHeader(HEADER_USER_ID) long userId,
                                        @PathVariable Long bookingId) {
-        return bookingMapper.toOutputBookingDto(bookingService.getBooking(userId, bookingId),userId );
+        return bookingMapper.toOutputBookingDto(bookingService.getBooking(userId, bookingId), userId);
     }
 
     @GetMapping()
     public List<OutputBookingDto> getBookingsBooker(@RequestHeader(HEADER_USER_ID) long userId,
-                                                      @RequestParam(defaultValue = "ALL") String state) {
+                                                    @RequestParam(defaultValue = "ALL") String state) {
         return bookingService.getBookingsBooker(userId, state)
                 .stream()
                 .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
@@ -57,7 +57,7 @@ public class BookingController {
 
     @GetMapping(value = "/owner")
     public List<OutputBookingDto> getBookingsOwner(@RequestHeader(HEADER_USER_ID) long userId,
-                                                     @RequestParam(defaultValue = "ALL") String state) {
+                                                   @RequestParam(defaultValue = "ALL") String state) {
         return bookingService.getBookingsOwner(userId, state)
                 .stream()
                 .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))

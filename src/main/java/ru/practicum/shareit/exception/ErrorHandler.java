@@ -25,6 +25,7 @@ public class ErrorHandler {
     public ErrorResponse handleForbiddenException(final ForbiddenException e) {
         return new ErrorResponse("error", e.getMessage());
     }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleUnavailableException(final UnavailableException e) {
