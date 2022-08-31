@@ -104,28 +104,27 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings = null;
         switch (getState) {
             case ALL:
-                bookings = bookingStorage.findByBookerIdOrderByStartDesc(userId);
+                bookings = bookingStorage.findAllBookingsByBookerId(userId);
                 log.info("Найдены все брони пользователя");
                 break;
             case PAST:
-                bookings = bookingStorage.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, dateTime);
+                bookings = bookingStorage.findAllPastBookingsByBookerId(userId, dateTime);
                 log.info("Найдены все завершенные брони пользователя");
                 break;
             case FUTURE:
-                bookings = bookingStorage.findByBookerIdAndStartIsAfterOrderByStartDesc(userId, dateTime);
+                bookings = bookingStorage.findAllFutureBookingsByBookerId(userId, dateTime);
                 log.info("Найдены все будущие брони пользователя");
                 break;
             case WAITING:
-                bookings = bookingStorage.findByBookerIdAndStatusIsOrderByStartDesc(userId, Status.WAITING);
+                bookings = bookingStorage.findByStatusAllBookingsByBookerId(userId, Status.WAITING);
                 log.info("Найдены все брони пользователя, ожидающие подтверждения");
                 break;
             case REJECTED:
-                bookings = bookingStorage.findByBookerIdAndStatusIsOrderByStartDesc(userId, Status.REJECTED);
+                bookings = bookingStorage.findByStatusAllBookingsByBookerId(userId, Status.REJECTED);
                 log.info("Найдены все отклоненные брони пользователя");
                 break;
             case CURRENT:
-                bookings = bookingStorage.
-                        findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId, dateTime, dateTime);
+                bookings = bookingStorage.findAllCurrentBookingsByBookerId(userId, dateTime, dateTime);
         }
         return bookings;
     }
@@ -155,7 +154,7 @@ public class BookingServiceImpl implements BookingService {
                 case PAST:
                     for (Item item : items) {
                         List<Booking> allBookings = bookingStorage
-                                .findByItemIdAndEndIsBefore(item.getId(), dateTime);
+                                .findAllPastBookingsByItemId(item.getId(), dateTime);
                         if (!allBookings.isEmpty()) {
                             bookings.addAll(allBookings);
                         }
@@ -164,7 +163,7 @@ public class BookingServiceImpl implements BookingService {
                 case FUTURE:
                     for (Item item : items) {
                         List<Booking> allBookings = bookingStorage
-                                .findByItemIdAndStartIsAfter(item.getId(), dateTime);
+                                .findAllFutureBookingsByItemId(item.getId(), dateTime);
                         if (!allBookings.isEmpty()) {
                             bookings.addAll(allBookings);
                         }
@@ -191,7 +190,7 @@ public class BookingServiceImpl implements BookingService {
                 case CURRENT:
                     for (Item item : items) {
                         List<Booking> allBookings = bookingStorage.
-                                findByItemIdAndStartIsBeforeAndEndIsAfter(item.getId(), dateTime, dateTime);
+                                findAllCurrentBookingByItemId(item.getId(), dateTime, dateTime);
                         if (!allBookings.isEmpty()) {
                             bookings.addAll(allBookings);
                         }
@@ -211,19 +210,19 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingsByItemIdForPastState(long itemId, LocalDateTime dateTime) {
-        return bookingStorage.findByItemIdAndEndIsBefore(itemId, dateTime);
+    public List<Booking> findAllPastBookingsByItemId(long itemId, LocalDateTime dateTime) {
+        return bookingStorage.findAllPastBookingsByItemId(itemId, dateTime);
 
     }
 
     @Override
-    public List<Booking> getBookingsByItemIdForFutureState(long itemId, LocalDateTime dateTime) {
-        return bookingStorage.findByItemIdAndStartIsAfter(itemId, dateTime);
+    public List<Booking> findAllFutureBookingsByItemId(long itemId, LocalDateTime dateTime) {
+        return bookingStorage.findAllFutureBookingsByItemId(itemId, dateTime);
     }
 
     @Override
-    public List<Booking> getBookingsUsedByUser(long itemId, long userId, LocalDateTime dateTime) {
-        return bookingStorage.findByItemIdAndBookerIdAndEndIsBefore(itemId, userId, dateTime);
+    public List<Booking> findAllPastBookingsByBookerAndItemId(long itemId, long userId, LocalDateTime dateTime) {
+        return bookingStorage.findAllPastBookingsByBookerAndItemId(itemId, userId, dateTime);
     }
 
     private void checkExistUser(long userId) {

@@ -75,7 +75,7 @@ public class ItemMapper {
         List<Booking> bookings = bookingService.getBookingsByItemId(itemId);
         if (!bookings.isEmpty()) {
             LocalDateTime dateTime = LocalDateTime.now();
-            List<Booking> allLastBookings = bookingService.getBookingsByItemIdForPastState(itemId, dateTime);
+            List<Booking> allLastBookings = bookingService.findAllPastBookingsByItemId(itemId, dateTime);
             if (!allLastBookings.isEmpty()) {
                 if (allLastBookings.size() > 1) {
                     allLastBookings.sort((o1, o2) -> o2.getStart().compareTo(o1.getStart()));
@@ -89,7 +89,7 @@ public class ItemMapper {
                 lastBooking.setBookerId(allLastBookings.get(0).getBookerId());
                 outputItemDto.setLastBooking(lastBooking);
             }
-            List<Booking> allNextBookings = bookingService.getBookingsByItemIdForFutureState(itemId, dateTime);
+            List<Booking> allNextBookings = bookingService.findAllFutureBookingsByItemId(itemId, dateTime);
             if (!allNextBookings.isEmpty()) {
                 if (bookings.size() > 1) {
                     bookings.sort((o1, o2) -> o2.getStart().compareTo(o1.getStart()));

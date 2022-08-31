@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingService {
+
+
     Booking addBooking(long userId, Booking booking);
 
     Booking replyFromOwner(long userId, long bookingId, boolean approved);
@@ -16,10 +18,9 @@ public interface BookingService {
 
     List<Booking> getBookingsByItemId(long itemId);
 
-    List<Booking> getBookingsByItemIdForPastState(long itemId, LocalDateTime dateTime);
+    List<Booking> findAllPastBookingsByItemId(long itemId, LocalDateTime dateTime);
 
-    List<Booking> getBookingsByItemIdForFutureState(long itemId, LocalDateTime dateTime);
+    List<Booking> findAllFutureBookingsByItemId(long itemId, LocalDateTime dateTime);
 
-    List<Booking> getBookingsUsedByUser(long itemId, long userId, LocalDateTime dateTime);
-
+    List<Booking> findAllPastBookingsByBookerAndItemId(long itemId, long userId, LocalDateTime dateTime);
 }

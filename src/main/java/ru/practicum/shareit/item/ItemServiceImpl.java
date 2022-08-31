@@ -101,8 +101,7 @@ public class ItemServiceImpl implements ItemService {
         if (text.equals(EMPTY_STRING) || text.equals(SPACE_STRING)) {
             return new LinkedList<>();
         }
-        List<Item> items = itemStorage
-                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableTrue(text, text);
+        List<Item> items = itemStorage.searchItemByText(text);
         log.info("Вещи по запросу = {} найдены", text);
         return items;
     }
@@ -112,10 +111,7 @@ public class ItemServiceImpl implements ItemService {
         checkExistUser(userId);
         getItem(userId, itemId);
         LocalDateTime dateTime = LocalDateTime.now();
-        //TODO попробовать найти без использования BookingService
-        // добавить проверку, что пользователь, который пишет комментарий, действительно брал вещь в аренду.
-        // сделать отдельный сервис для comment?
-        List<Booking> bookings = bookingStorage.findByItemIdAndBookerIdAndEndIsBefore(itemId, userId, dateTime);
+        List<Booking> bookings = bookingStorage.findAllPastBookingsByBookerAndItemId(itemId, userId, dateTime);
         if (bookings.isEmpty()) {
             throw new UnavailableException("Пользователь не может оставить отзыв на эту вещь");
         }
