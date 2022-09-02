@@ -42,6 +42,7 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
             " where b.itemId in(select i.id from Item i where i.ownerId = ?1)" +
             " order by b.start desc ")
     List<Booking> findByIdOwnerItem(long userId);
+
     @Query("select b from Booking b " +
             " where b.itemId in(select i.id from Item i where i.ownerId = ?1)" +
             " and b.end < ?2" +
@@ -65,8 +66,8 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
             " and b.start < ?2 and b.end > ?3" +
             " order by b.start desc ")
     List<Booking> findAllCurrentBookingByIdOwnerItem(long itemId,
-                                                LocalDateTime currentDateTimeOne,
-                                                LocalDateTime currentDateTimeTwo);
+                                                     LocalDateTime currentDateTimeOne,
+                                                     LocalDateTime currentDateTimeTwo);
 
     List<Booking> findByItemId(long itemId);
 

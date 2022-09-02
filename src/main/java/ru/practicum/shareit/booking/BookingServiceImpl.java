@@ -158,8 +158,8 @@ public class BookingServiceImpl implements BookingService {
                     bookings = bookingStorage.findByIdOwnerItemAndStatusIs(userId, Status.REJECTED);
                     break;
                 case CURRENT:
-                    bookings = bookingStorage.
-                            findAllCurrentBookingByIdOwnerItem(userId, currentDateTime, currentDateTime);
+                    bookings = bookingStorage
+                            .findAllCurrentBookingByIdOwnerItem(userId, currentDateTime, currentDateTime);
                     break;
             }
         }
