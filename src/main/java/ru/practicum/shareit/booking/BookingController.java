@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public class BookingController {
 
     private static final String HEADER_USER_ID = "X-Sharer-User-Id";
+
     private final BookingService bookingService;
     private final BookingMapper bookingMapper;
 
@@ -32,10 +33,10 @@ public class BookingController {
     }
 
     @PatchMapping(value = "/{bookingId}")
-    public OutputBookingDto replyFromOwner(@RequestHeader(HEADER_USER_ID) long userId,
+    public OutputBookingDto confirmBookingByOwner(@RequestHeader(HEADER_USER_ID) long userId,
                                            @PathVariable Long bookingId,
                                            @RequestParam Boolean approved) {
-        return bookingMapper.toOutputBookingDto(bookingService.replyFromOwner(userId, bookingId, approved), userId);
+        return bookingMapper.toOutputBookingDto(bookingService.confirmBookingByOwner(userId, bookingId, approved), userId);
 
     }
 
@@ -46,9 +47,9 @@ public class BookingController {
     }
 
     @GetMapping()
-    public List<OutputBookingDto> getBookingsBooker(@RequestHeader(HEADER_USER_ID) long userId,
+    public List<OutputBookingDto> getBookingsByBookerId(@RequestHeader(HEADER_USER_ID) long userId,
                                                     @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getBookingsBooker(userId, state)
+        return bookingService.getBookingsByBookerId(userId, state)
                 .stream()
                 .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
                 .collect(Collectors.toList());
@@ -56,9 +57,9 @@ public class BookingController {
     }
 
     @GetMapping(value = "/owner")
-    public List<OutputBookingDto> getBookingsOwner(@RequestHeader(HEADER_USER_ID) long userId,
+    public List<OutputBookingDto> getBookingsByIdOwnerItem(@RequestHeader(HEADER_USER_ID) long userId,
                                                    @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getBookingsOwner(userId, state)
+        return bookingService.getBookingsByIdOwnerItem(userId, state)
                 .stream()
                 .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
                 .collect(Collectors.toList());

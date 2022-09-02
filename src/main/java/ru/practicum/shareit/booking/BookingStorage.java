@@ -18,12 +18,12 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
     @Query("select b from Booking b " +
             " where b.bookerId = ?1 and b.start > ?2" +
             " order by b.start desc ")
-    List<Booking> findAllFutureBookingsByBookerId(long bookerId, LocalDateTime dateTime);
+    List<Booking> findAllFutureBookingsByBookerId(long bookerId, LocalDateTime currentDateTime);
 
     @Query("select b from Booking b " +
             " where b.bookerId = ?1 and b.end < ?2" +
             " order by b.start desc ")
-    List<Booking> findAllPastBookingsByBookerId(long bookerId, LocalDateTime dateTime);
+    List<Booking> findAllPastBookingsByBookerId(long bookerId, LocalDateTime currentDateTime);
 
 
     @Query("select b from Booking b " +
@@ -38,33 +38,52 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
                                                    LocalDateTime dateTimeOne,
                                                    LocalDateTime dateTimeTwo);
 
+    @Query("select b from Booking b " +
+            " where b.itemId in(select i.id from Item i where i.ownerId = ?1)" +
+            " order by b.start desc ")
+    List<Booking> findByIdOwnerItem(long userId);
+    @Query("select b from Booking b " +
+            " where b.itemId in(select i.id from Item i where i.ownerId = ?1)" +
+            " and b.end < ?2" +
+            " order by b.start desc ")
+    List<Booking> findAllPastBookingsByIdOwnerItem(long userId, LocalDateTime currentDateTime);
+
+    @Query("select b from Booking b " +
+            " where b.itemId in(select i.id from Item i where i.ownerId = ?1)" +
+            " and b.start > ?2" +
+            " order by b.start desc ")
+    List<Booking> findAllFutureBookingsByIdOwnerItem(long userId, LocalDateTime currentDateTime);
+
+    @Query("select b from Booking b " +
+            " where b.itemId in(select i.id from Item i where i.ownerId = ?1)" +
+            " and b.status = ?2" +
+            " order by b.start desc ")
+    List<Booking> findByIdOwnerItemAndStatusIs(long userId, Status status);
+
+    @Query("select b from Booking b " +
+            " where b.itemId in(select i.id from Item i where i.ownerId = ?1)" +
+            " and b.start < ?2 and b.end > ?3" +
+            " order by b.start desc ")
+    List<Booking> findAllCurrentBookingByIdOwnerItem(long itemId,
+                                                LocalDateTime currentDateTimeOne,
+                                                LocalDateTime currentDateTimeTwo);
+
     List<Booking> findByItemId(long itemId);
 
     @Query("select b from Booking b " +
             " where b.itemId = ?1 and b.start > ?2" +
             " order by b.start desc ")
-    List<Booking> findAllFutureBookingsByItemId(long itemId, LocalDateTime dateTime);
+    List<Booking> findAllFutureBookingsByItemId(long itemId, LocalDateTime currentDateTime);
 
     @Query("select b from Booking b " +
             " where b.itemId = ?1 and b.end < ?2" +
             " order by b.start desc ")
-    List<Booking> findAllPastBookingsByItemId(long itemId, LocalDateTime dateTime);
-
-    @Query("select b from Booking b " +
-            " where b.itemId = ?1 and b.status = ?2" +
-            " order by b.start desc ")
-    List<Booking> findByItemIdAndStatusIs(long itemId, Status status);
-
-    @Query("select b from Booking b " +
-            " where b.itemId = ?1 and b.start < ?2 and b.end > ?3" +
-            " order by b.start desc ")
-    List<Booking> findAllCurrentBookingByItemId(long itemId,
-                                                LocalDateTime dateTimeOne,
-                                                LocalDateTime dateTimeTwo);
+    List<Booking> findAllPastBookingsByItemId(long itemId, LocalDateTime currentDateTime);
 
     @Query("select b from Booking b " +
             " where b.itemId = ?1 and b.bookerId = ?2 and b.end < ?3" +
             " order by b.start desc ")
-    List<Booking> findAllPastBookingsByBookerAndItemId(long itemId, long userId, LocalDateTime dateTime);
+    List<Booking> findAllPastBookingsByBookerAndItemId(long itemId, long userId, LocalDateTime currentDateTime);
+
 }
 

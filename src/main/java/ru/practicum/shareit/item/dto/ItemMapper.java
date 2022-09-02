@@ -2,7 +2,9 @@ package ru.practicum.shareit.item.dto;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.*;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingService;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemService;
@@ -14,8 +16,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class ItemMapper {
-    private static final byte FIRST_ELEMENT = 0;
-    private static final byte MIN_SIZE = 1;
+    private static final byte FIRST_BOOKING_INDEX = 0;
+    private static final byte MIN_BOOKING_AMOUNT = 1;
+
     private final BookingService bookingService;
     private final ItemService itemService;
     private final CommentMapper commentMapper;
@@ -36,9 +39,9 @@ public class ItemMapper {
         outputItemDto.setDescription(item.getDescription());
         outputItemDto.setAvailable(item.getAvailable());
         if (userId == item.getOwnerId()) {
-            LocalDateTime dateTime = LocalDateTime.now();
-            addLastBooking(outputItemDto, item.getId(), dateTime);
-            addNextBooking(outputItemDto, item.getId(), dateTime);
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            addLastBooking(outputItemDto, item.getId(), currentDateTime);
+            addNextBooking(outputItemDto, item.getId(), currentDateTime);
             return outputItemDto;
         }
         return outputItemDto;
@@ -77,33 +80,33 @@ public class ItemMapper {
 
     }
 
-    private void addLastBooking(OutputItemDto outputItemDto, long itemId, LocalDateTime dateTime) {
+    private void addLastBooking(OutputItemDto outputItemDto, long itemId, LocalDateTime currentDateTime) {
         List<Booking> bookings = bookingService.getBookingsByItemId(itemId);
         if (!bookings.isEmpty()) {
-            List<Booking> allLastBookings = bookingService.findAllPastBookingsByItemId(itemId, dateTime);
+            List<Booking> allLastBookings = bookingService.findAllPastBookingsByItemId(itemId, currentDateTime);
             if (!allLastBookings.isEmpty()) {
-                if (allLastBookings.size() > MIN_SIZE) {
+                if (allLastBookings.size() > MIN_BOOKING_AMOUNT) {
                     allLastBookings.sort(Comparator.comparing(Booking::getEnd));
                 }
-                LastBooking lastBooking = new LastBooking();
-                lastBooking.setId(allLastBookings.get(FIRST_ELEMENT).getId());
-                lastBooking.setBookerId(allLastBookings.get(FIRST_ELEMENT).getBookerId());
+                BookingDto lastBooking = new BookingDto();
+                lastBooking.setId(allLastBookings.get(FIRST_BOOKING_INDEX).getId());
+                lastBooking.setBookerId(allLastBookings.get(FIRST_BOOKING_INDEX).getBookerId());
                 outputItemDto.setLastBooking(lastBooking);
             }
         }
     }
 
-    private void addNextBooking(OutputItemDto outputItemDto, long itemId, LocalDateTime dateTime) {
+    private void addNextBooking(OutputItemDto outputItemDto, long itemId, LocalDateTime currentDateTime) {
         List<Booking> bookings = bookingService.getBookingsByItemId(itemId);
         if (!bookings.isEmpty()) {
-            List<Booking> allNextBookings = bookingService.findAllFutureBookingsByItemId(itemId, dateTime);
+            List<Booking> allNextBookings = bookingService.findAllFutureBookingsByItemId(itemId, currentDateTime);
             if (!allNextBookings.isEmpty()) {
-                if (bookings.size() > MIN_SIZE) {
+                if (bookings.size() > MIN_BOOKING_AMOUNT) {
                     bookings.sort((o1, o2) -> o2.getStart().compareTo(o1.getStart()));
                 }
-                NextBooking nextBooking = new NextBooking();
-                nextBooking.setId(allNextBookings.get(FIRST_ELEMENT).getId());
-                nextBooking.setBookerId(allNextBookings.get(FIRST_ELEMENT).getBookerId());
+                BookingDto nextBooking = new BookingDto();
+                nextBooking.setId(allNextBookings.get(FIRST_BOOKING_INDEX).getId());
+                nextBooking.setBookerId(allNextBookings.get(FIRST_BOOKING_INDEX).getBookerId());
                 outputItemDto.setNextBooking(nextBooking);
             }
         }

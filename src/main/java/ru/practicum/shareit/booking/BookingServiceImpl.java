@@ -51,7 +51,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking replyFromOwner(long userId, long bookingId, boolean approved) {
+    public Booking confirmBookingByOwner(long userId, long bookingId, boolean approved) {
         checkExistUser(userId);
         Booking booking = bookingStorage.findById(bookingId)
                 .stream()
@@ -91,13 +91,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingsBooker(long userId, String state) {
+    public List<Booking> getBookingsByBookerId(long userId, String state) {
         checkExistUser(userId);
         State getState;
         try {
             getState = State.valueOf(state);
         } catch (IllegalArgumentException e) {
-            throw new UnsupportedStatusException("Неподдерживаемый статус");
+            throw new UnsupportedStatusException("Неподдерживаемый статус " + state);
         }
         LocalDateTime dateTime = LocalDateTime.now();
         List<Booking> bookings = null;
@@ -129,7 +129,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingsOwner(long userId, String state) {
+    public List<Booking> getBookingsByIdOwnerItem(long userId, String state) {
         checkExistUser(userId);
         State getState;
         try {
@@ -139,66 +139,29 @@ public class BookingServiceImpl implements BookingService {
         }
         List<Booking> bookings = new LinkedList<>();
         List<Item> items = itemStorage.findItemByOwnerId(userId);
-        LocalDateTime dateTime = LocalDateTime.now();
+        LocalDateTime currentDateTime = LocalDateTime.now();
         if (!items.isEmpty()) {
             switch (getState) {
                 case ALL:
-                    for (Item item : items) {
-                        List<Booking> allBookings = bookingStorage.findByItemId(item.getId());
-                        if (!allBookings.isEmpty()) {
-                            bookings.addAll(allBookings);
-                        }
-                    }
+                    bookings = bookingStorage.findByIdOwnerItem(userId);
                     break;
                 case PAST:
-                    for (Item item : items) {
-                        List<Booking> allBookings = bookingStorage
-                                .findAllPastBookingsByItemId(item.getId(), dateTime);
-                        if (!allBookings.isEmpty()) {
-                            bookings.addAll(allBookings);
-                        }
-                    }
+                    bookings = bookingStorage.findAllPastBookingsByIdOwnerItem(userId, currentDateTime);
                     break;
                 case FUTURE:
-                    for (Item item : items) {
-                        List<Booking> allBookings = bookingStorage
-                                .findAllFutureBookingsByItemId(item.getId(), dateTime);
-                        if (!allBookings.isEmpty()) {
-                            bookings.addAll(allBookings);
-                        }
-                    }
+                    bookings = bookingStorage.findAllFutureBookingsByIdOwnerItem(userId, currentDateTime);
                     break;
                 case WAITING:
-                    for (Item item : items) {
-                        List<Booking> allBookings = bookingStorage
-                                .findByItemIdAndStatusIs(item.getId(), Status.WAITING);
-                        if (!allBookings.isEmpty()) {
-                            bookings.addAll(allBookings);
-                        }
-                    }
+                    bookings = bookingStorage.findByIdOwnerItemAndStatusIs(userId, Status.WAITING);
                     break;
                 case REJECTED:
-                    for (Item item : items) {
-                        List<Booking> allBookings = bookingStorage
-                                .findByItemIdAndStatusIs(item.getId(), Status.REJECTED);
-                        if (!allBookings.isEmpty()) {
-                            bookings.addAll(allBookings);
-                        }
-                    }
+                    bookings = bookingStorage.findByIdOwnerItemAndStatusIs(userId, Status.REJECTED);
                     break;
                 case CURRENT:
-                    for (Item item : items) {
-                        List<Booking> allBookings = bookingStorage
-                                .findAllCurrentBookingByItemId(item.getId(), dateTime, dateTime);
-                        if (!allBookings.isEmpty()) {
-                            bookings.addAll(allBookings);
-                        }
-                    }
+                    bookings = bookingStorage.
+                            findAllCurrentBookingByIdOwnerItem(userId, currentDateTime, currentDateTime);
                     break;
             }
-        }
-        if (bookings.size() > 1) {
-            bookings.sort((o1, o2) -> o2.getStart().compareTo(o1.getStart()));
         }
         return bookings;
     }
@@ -209,14 +172,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> findAllPastBookingsByItemId(long itemId, LocalDateTime dateTime) {
-        return bookingStorage.findAllPastBookingsByItemId(itemId, dateTime);
+    public List<Booking> findAllPastBookingsByItemId(long itemId, LocalDateTime currentDateTime) {
+        return bookingStorage.findAllPastBookingsByItemId(itemId, currentDateTime);
 
     }
 
     @Override
-    public List<Booking> findAllFutureBookingsByItemId(long itemId, LocalDateTime dateTime) {
-        return bookingStorage.findAllFutureBookingsByItemId(itemId, dateTime);
+    public List<Booking> findAllFutureBookingsByItemId(long itemId, LocalDateTime currentDateTime) {
+        return bookingStorage.findAllFutureBookingsByItemId(itemId, currentDateTime);
     }
 
     private void checkExistUser(long userId) {

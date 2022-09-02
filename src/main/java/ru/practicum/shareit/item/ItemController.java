@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/items")
 public class ItemController {
     private static final String HEADER_USER_ID = "X-Sharer-User-Id";
+
     private final ItemService itemService;
     private final ItemMapper itemMapper;
     private final CommentMapper commentMapper;

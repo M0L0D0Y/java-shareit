@@ -22,6 +22,7 @@ import java.util.List;
 public class ItemServiceImpl implements ItemService {
     private static final String EMPTY_STRING = "";
     private static final String SPACE_STRING = " ";
+
     private final ItemStorage itemStorage;
     private final UserStorage userStorage;
     private final CommentStorage commentStorage;
