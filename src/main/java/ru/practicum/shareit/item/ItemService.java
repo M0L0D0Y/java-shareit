@@ -16,4 +16,6 @@ public interface ItemService {
     Comment addComment(long userId, long itemId, Comment comment);
 
     List<Comment> getCommentsByItemID(long itemId);
+
+    List<Item> getAllItemByRequestId(long userId, long requestId);
 }

@@ -18,4 +18,7 @@ public interface ItemStorage extends JpaRepository<Item, Long> {
             " and i.available = true ")
     List<Item> searchItemByText(String text);
 
+    @Query("select i from Item i where i.requestId = ?1 and  i.available = true ")
+    List<Item> getAllItemByRequestId(long requestId);
+
 }

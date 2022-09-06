@@ -34,8 +34,8 @@ public class BookingController {
 
     @PatchMapping(value = "/{bookingId}")
     public OutputBookingDto confirmBookingByOwner(@RequestHeader(HEADER_USER_ID) long userId,
-                                           @PathVariable Long bookingId,
-                                           @RequestParam Boolean approved) {
+                                                  @PathVariable Long bookingId,
+                                                  @RequestParam Boolean approved) {
         return bookingMapper.toOutputBookingDto(bookingService.confirmBookingByOwner(userId, bookingId, approved), userId);
 
     }
@@ -48,7 +48,7 @@ public class BookingController {
 
     @GetMapping()
     public List<OutputBookingDto> getBookingsByBookerId(@RequestHeader(HEADER_USER_ID) long userId,
-                                                    @RequestParam(defaultValue = "ALL") String state) {
+                                                        @RequestParam(defaultValue = "ALL") String state) {
         return bookingService.getBookingsByBookerId(userId, state)
                 .stream()
                 .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
@@ -58,7 +58,7 @@ public class BookingController {
 
     @GetMapping(value = "/owner")
     public List<OutputBookingDto> getBookingsByIdOwnerItem(@RequestHeader(HEADER_USER_ID) long userId,
-                                                   @RequestParam(defaultValue = "ALL") String state) {
+                                                           @RequestParam(defaultValue = "ALL") String state) {
         return bookingService.getBookingsByIdOwnerItem(userId, state)
                 .stream()
                 .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))

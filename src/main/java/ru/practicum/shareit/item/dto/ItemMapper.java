@@ -38,6 +38,7 @@ public class ItemMapper {
         outputItemDto.setName(item.getName());
         outputItemDto.setDescription(item.getDescription());
         outputItemDto.setAvailable(item.getAvailable());
+        outputItemDto.setRequestId(item.getRequestId());
         if (userId == item.getOwnerId()) {
             LocalDateTime currentDateTime = LocalDateTime.now();
             addLastBooking(outputItemDto, item.getId(), currentDateTime);
@@ -52,6 +53,7 @@ public class ItemMapper {
         item.setName(inputItemDto.getName());
         item.setDescription(inputItemDto.getDescription());
         item.setAvailable(inputItemDto.getAvailable());
+        item.setRequestId(inputItemDto.getRequestId());
         return item;
     }
 

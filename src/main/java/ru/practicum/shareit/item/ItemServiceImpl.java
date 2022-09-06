@@ -127,6 +127,12 @@ public class ItemServiceImpl implements ItemService {
         return commentStorage.findByItemId(itemId);
     }
 
+    @Override
+    public List<Item> getAllItemByRequestId(long userId, long requestId) {
+        checkExistUser(userId);
+        return itemStorage.getAllItemByRequestId(requestId);
+    }
+
     private void checkExistUser(long userId) {
         userStorage.findById(userId)
                 .stream()
