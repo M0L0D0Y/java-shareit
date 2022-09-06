@@ -9,7 +9,11 @@ public interface ItemService {
 
     Item getItem(long userId, long id);
 
-    List<Item> getAllItemsByIdOwner(long userId);
+    List<Item> getAllItem(long userId);
 
-    List<Item> searchItem(long userId, String text);
+    List<Item> searchItemByText(long userId, String text);
+
+    Comment addComment(long userId, long itemId, Comment comment);
+
+    List<Comment> getCommentsByItemID(long itemId);
 }

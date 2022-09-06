@@ -2,7 +2,8 @@ package ru.practicum.shareit.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.InputUserDto;
+import ru.practicum.shareit.user.dto.OutputUserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 
 import javax.validation.Valid;
@@ -22,20 +23,20 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto addUser(@Valid @RequestBody UserDto userDto) {
-        User user = userMapper.toUser(userDto);
-        return userMapper.toUserDto(userService.addUser(user));
+    public OutputUserDto addUser(@Valid @RequestBody InputUserDto inputUserDto) {
+        User user = userMapper.toUser(inputUserDto);
+        return userMapper.toOutputUserDto(userService.addUser(user));
     }
 
     @PatchMapping(value = "/{id}")
-    public UserDto updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        User user = userMapper.toUser(userDto);
-        return userMapper.toUserDto(userService.updateUser(id, user));
+    public OutputUserDto updateUser(@PathVariable Long id, @RequestBody InputUserDto inputUserDto) {
+        User user = userMapper.toUser(inputUserDto);
+        return userMapper.toOutputUserDto(userService.updateUser(id, user));
     }
 
     @GetMapping(value = "/{id}")
-    public UserDto getUser(@PathVariable Long id) {
-        return userMapper.toUserDto(userService.getUser(id));
+    public OutputUserDto getUser(@PathVariable Long id) {
+        return userMapper.toOutputUserDto(userService.getUser(id));
     }
 
     @DeleteMapping(value = "/{id}")
@@ -44,10 +45,10 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> getAllUsers() {
+    public List<OutputUserDto> getAllUsers() {
         return userService.getAllUsers()
                 .stream()
-                .map(userMapper::toUserDto)
+                .map(userMapper::toOutputUserDto)
                 .collect(Collectors.toList());
     }
 }

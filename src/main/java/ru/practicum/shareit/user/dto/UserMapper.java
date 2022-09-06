@@ -5,18 +5,18 @@ import ru.practicum.shareit.user.User;
 
 @Component
 public class UserMapper {
-    public UserDto toUserDto(User user) {
-        UserDto userDto = new UserDto();
-        userDto.setId(user.getId());
-        userDto.setName(user.getName());
-        userDto.setEmail(user.getEmail());
-        return userDto;
+    public OutputUserDto toOutputUserDto(User user) {
+        OutputUserDto outputUserDto = new OutputUserDto();
+        outputUserDto.setId(user.getId());
+        outputUserDto.setName(user.getName());
+        outputUserDto.setEmail(user.getEmail());
+        return outputUserDto;
     }
 
-    public User toUser(UserDto userDto) {
+    public User toUser(InputUserDto inputUserDto) {
         User user = new User();
-        user.setName(userDto.getName());
-        user.setEmail(userDto.getEmail());
+        user.setName(inputUserDto.getName());
+        user.setEmail(inputUserDto.getEmail());
         return user;
     }
 }

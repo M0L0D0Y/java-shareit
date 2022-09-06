@@ -6,11 +6,10 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 @Data
-public class UserDto {
-    Long id;
+public class InputUserDto {
     @NotBlank(message = "Нет имени пользователя")
-    String name;
+    private String name;
     @NotBlank(message = "Нет email пользователя")
     @Email
-    String email;
+    private String email;
 }
