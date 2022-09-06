@@ -9,9 +9,9 @@ public interface ItemService {
 
     Item getItem(long userId, long id);
 
-    List<Item> getAllItem(long userId);
+    List<Item> getAllItem(long userId, int from, int size);
 
-    List<Item> searchItemByText(long userId, String text);
+    List<Item> searchItemByText(long userId, String text, int from, int size);
 
     Comment addComment(long userId, long itemId, Comment comment);
 

@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.dto.InputBookingDto;
 import ru.practicum.shareit.booking.dto.OutputBookingDto;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,20 +49,29 @@ public class BookingController {
 
     @GetMapping()
     public List<OutputBookingDto> getBookingsByBookerId(@RequestHeader(HEADER_USER_ID) long userId,
-                                                        @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getBookingsByBookerId(userId, state)
-                .stream()
-                .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
-                .collect(Collectors.toList());
-
+                                                        @RequestParam(defaultValue = "ALL") String state,
+                                                        @RequestParam(defaultValue = "0") int from,
+                                                        @RequestParam(defaultValue = "10") int size) {
+        List<Booking> bookingPage = bookingService.getBookingsByBookerId(userId, state, from, size);
+        if (bookingPage != null) {
+            return bookingPage.stream()
+                    .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
     @GetMapping(value = "/owner")
     public List<OutputBookingDto> getBookingsByIdOwnerItem(@RequestHeader(HEADER_USER_ID) long userId,
-                                                           @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getBookingsByIdOwnerItem(userId, state)
-                .stream()
-                .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
-                .collect(Collectors.toList());
+                                                           @RequestParam(defaultValue = "ALL") String state,
+                                                           @RequestParam(defaultValue = "0") int from,
+                                                           @RequestParam(defaultValue = "10") int size) {
+        List<Booking> bookingPage = bookingService.getBookingsByIdOwnerItem(userId, state, from, size);
+        if (bookingPage != null) {
+            return bookingPage.stream()
+                    .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 }

@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStorage;
@@ -10,6 +11,7 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnavailableException;
 import ru.practicum.shareit.item.storage.CommentStorage;
 import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.requests.Page;
 import ru.practicum.shareit.user.UserStorage;
 
 import java.time.LocalDateTime;
@@ -87,21 +89,23 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> getAllItem(long userId) {
+    public List<Item> getAllItem(long userId, int from, int size) {
         checkExistUser(userId);
-        List<Item> items = itemStorage.findItemByOwnerId(userId);
+        Pageable pageable = Page.getPageable(from, size);
+        List<Item> items = itemStorage.findItemByOwnerId(userId, pageable);
         items.sort((Comparator.comparing(Item::getId)));
         log.info("Все вещи пользователя с id = {} найдены", userId);
         return items;
     }
 
     @Override
-    public List<Item> searchItemByText(long userId, String text) {
+    public List<Item> searchItemByText(long userId, String text, int from, int size) {
         checkExistUser(userId);
         if (text.equals(EMPTY_STRING) || text.equals(SPACE_STRING)) {
             return new LinkedList<>();
         }
-        List<Item> items = itemStorage.searchItemByText(text);
+        Pageable pageable = Page.getPageable(from, size);
+        List<Item> items = itemStorage.searchItemByText(text, pageable);
         log.info("Вещи по запросу = {} найдены", text);
         return items;
     }

@@ -44,7 +44,7 @@ public class ItemRequestController {
     @GetMapping(value = "/all")
     public List<OutputItemRequestDto> getAllItemRequest(@RequestHeader(HEADER_USER_ID) Long userId,
                                                         @RequestParam(defaultValue = "0") int from,
-                                                        @RequestParam(defaultValue = "1") int size) {
+                                                        @RequestParam(defaultValue = "10") int size) {
         return itemRequestService.getAllItemRequest(userId, from, size)
                 .stream()
                 .map(itemRequest -> itemRequestMapper.toOutputItemRequestDto(userId, itemRequest))

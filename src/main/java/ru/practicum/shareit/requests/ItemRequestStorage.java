@@ -12,6 +12,7 @@ public interface ItemRequestStorage extends PagingAndSortingRepository<ItemReque
     List<ItemRequest> getAllMeRequest(long userId);
 
     @Query("select r from ItemRequest r" +
+            " where r.requestor > ?1 or r.requestor < ?1" +
             " order by r.created desc ")
     List<ItemRequest> getAllRequest(long userId, Pageable pageable);
 }

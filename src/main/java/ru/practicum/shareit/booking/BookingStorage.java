@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -13,53 +14,54 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
     @Query("select b from Booking b " +
             " where b.bookerId = ?1" +
             " order by b.start desc ")
-    List<Booking> findAllBookingsByBookerId(long bookerId);
+    List<Booking> findAllBookingsByBookerId(long bookerId, Pageable pageable);
 
     @Query("select b from Booking b " +
             " where b.bookerId = ?1 and b.start > ?2" +
             " order by b.start desc ")
-    List<Booking> findAllFutureBookingsByBookerId(long bookerId, LocalDateTime currentDateTime);
+    List<Booking> findAllFutureBookingsByBookerId(long bookerId, LocalDateTime currentDateTime, Pageable pageable);
 
     @Query("select b from Booking b " +
             " where b.bookerId = ?1 and b.end < ?2" +
             " order by b.start desc ")
-    List<Booking> findAllPastBookingsByBookerId(long bookerId, LocalDateTime currentDateTime);
+    List<Booking> findAllPastBookingsByBookerId(long bookerId, LocalDateTime currentDateTime, Pageable pageable);
 
 
     @Query("select b from Booking b " +
             " where b.bookerId = ?1 and b.status = ?2" +
             " order by b.start desc ")
-    List<Booking> findByStatusAllBookingsByBookerId(long bookerId, Status status);
+    List<Booking> findByStatusAllBookingsByBookerId(long bookerId, Status status, Pageable pageable);
 
     @Query("select b from Booking b " +
             " where b.bookerId = ?1 and b.start < ?2 and b.end > ?3" +
             " order by b.start desc ")
     List<Booking> findAllCurrentBookingsByBookerId(long bookerId,
                                                    LocalDateTime dateTimeOne,
-                                                   LocalDateTime dateTimeTwo);
+                                                   LocalDateTime dateTimeTwo,
+                                                   Pageable pageable);
 
     @Query("select b from Booking b " +
             " where b.itemId in(select i.id from Item i where i.ownerId = ?1)" +
             " order by b.start desc ")
-    List<Booking> findByIdOwnerItem(long userId);
+    List<Booking> findByIdOwnerItem(long userId, Pageable pageable);
 
     @Query("select b from Booking b " +
             " where b.itemId in(select i.id from Item i where i.ownerId = ?1)" +
             " and b.end < ?2" +
             " order by b.start desc ")
-    List<Booking> findAllPastBookingsByIdOwnerItem(long userId, LocalDateTime currentDateTime);
+    List<Booking> findAllPastBookingsByIdOwnerItem(long userId, LocalDateTime currentDateTime, Pageable pageable);
 
     @Query("select b from Booking b " +
             " where b.itemId in(select i.id from Item i where i.ownerId = ?1)" +
             " and b.start > ?2" +
             " order by b.start desc ")
-    List<Booking> findAllFutureBookingsByIdOwnerItem(long userId, LocalDateTime currentDateTime);
+    List<Booking> findAllFutureBookingsByIdOwnerItem(long userId, LocalDateTime currentDateTime, Pageable pageable);
 
     @Query("select b from Booking b " +
             " where b.itemId in(select i.id from Item i where i.ownerId = ?1)" +
             " and b.status = ?2" +
             " order by b.start desc ")
-    List<Booking> findByIdOwnerItemAndStatusIs(long userId, Status status);
+    List<Booking> findByIdOwnerItemAndStatusIs(long userId, Status status, Pageable pageable);
 
     @Query("select b from Booking b " +
             " where b.itemId in(select i.id from Item i where i.ownerId = ?1)" +
@@ -67,7 +69,8 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
             " order by b.start desc ")
     List<Booking> findAllCurrentBookingByIdOwnerItem(long itemId,
                                                      LocalDateTime currentDateTimeOne,
-                                                     LocalDateTime currentDateTimeTwo);
+                                                     LocalDateTime currentDateTimeTwo,
+                                                     Pageable pageable);
 
     List<Booking> findByItemId(long itemId);
 

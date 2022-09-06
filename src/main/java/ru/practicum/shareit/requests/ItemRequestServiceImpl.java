@@ -2,12 +2,9 @@ package ru.practicum.shareit.requests;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.UnavailableException;
 import ru.practicum.shareit.user.UserStorage;
 
 import java.time.LocalDateTime;
@@ -48,11 +45,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequest> getAllItemRequest(long userId, int from, int size) {
         checkExistUser(userId);
-        if ((from < 0) || (size < 1)) {
-            throw new UnavailableException("неправильно заданы параеметры запроса " +
-                    "индекс " + from + " количество элементов " + size);
-        }
-        Pageable pageable = PageRequest.of(from, size, Sort.by("created").descending());
+        Pageable pageable = Page.getPageable(from, size);
         List<ItemRequest> foundRequests = itemRequestStorage.getAllRequest(userId, pageable);
         log.info("Все запросы других пользователей найдены");
         return foundRequests;

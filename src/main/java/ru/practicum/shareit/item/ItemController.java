@@ -49,8 +49,10 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<OutputItemDtoWithComment> getAllItem(@RequestHeader(HEADER_USER_ID) Long userId) {
-        return itemService.getAllItem(userId)
+    public List<OutputItemDtoWithComment> getAllItem(@RequestHeader(HEADER_USER_ID) Long userId,
+                                                     @RequestParam(defaultValue = "0") int from,
+                                                     @RequestParam(defaultValue = "10") int size) {
+        return itemService.getAllItem(userId, from, size)
                 .stream()
                 .map(item -> itemMapper.toOutputItemDto(item, userId))
                 .map(itemMapper::toOutputItemDtoWithComment)
@@ -59,8 +61,10 @@ public class ItemController {
 
     @GetMapping(value = "/search")
     public List<OutputItemDto> searchItemByText(@RequestHeader(HEADER_USER_ID) Long userId,
-                                          @RequestParam String text) {
-        return itemService.searchItemByText(userId, text)
+                                                @RequestParam String text,
+                                                @RequestParam(defaultValue = "0") int from,
+                                                @RequestParam(defaultValue = "10") int size) {
+        return itemService.searchItemByText(userId, text, from, size)
                 .stream()
                 .map(item -> itemMapper.toOutputItemDto(item, userId))
                 .collect(Collectors.toList());
