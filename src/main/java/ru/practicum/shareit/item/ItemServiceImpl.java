@@ -9,8 +9,6 @@ import ru.practicum.shareit.booking.BookingStorage;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnavailableException;
-import ru.practicum.shareit.item.storage.CommentStorage;
-import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.requests.Page;
 import ru.practicum.shareit.user.UserStorage;
 

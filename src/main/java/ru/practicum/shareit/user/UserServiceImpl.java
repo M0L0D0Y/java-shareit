@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.UnavailableException;
 import ru.practicum.shareit.exception.UserValidationException;
 
 import java.util.List;
@@ -55,9 +56,13 @@ public class UserServiceImpl implements UserService {
                     }
                 }
             }
-            userUpdate.setEmail(user.getEmail());
-            log.info("Обновили email");
         }
+        if ((user.getName() == null) && (user.getEmail() == null)) {
+            log.info("Нет данных для обновления!");
+            throw new UnavailableException("Нет данных для обновления!");
+        }
+        userUpdate.setEmail(user.getEmail());
+        log.info("Обновили email");
         User savedUserUpdate = userStorage.save(userUpdate);
         log.info("Пользователь обновлен");
         return savedUserUpdate;

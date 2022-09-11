@@ -9,5 +9,5 @@ public class ShareItApp {
 	public static void main(String[] args) {
 		SpringApplication.run(ShareItApp.class, args);
 	}
-///TODO Добавляем пагинацию к существующим эндпоинтам
+///TODO сделать тесты, посмотреть покрытие через мавен verify
 }

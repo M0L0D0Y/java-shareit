@@ -30,6 +30,15 @@ public class Item {
     @Column(name = "request_id")
     private Long requestId;
 
+    public Item(String name, String description, Boolean available, Long ownerId, Long requestId) {
+
+        this.name = name;
+        this.description = description;
+        this.available = available;
+        this.ownerId = ownerId;
+        this.requestId = requestId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

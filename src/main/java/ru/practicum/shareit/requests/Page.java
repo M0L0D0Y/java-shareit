@@ -7,7 +7,7 @@ import ru.practicum.shareit.exception.UnavailableException;
 public class Page {
     public static Pageable getPageable(int from, int size) {
         if ((from < 0) || (size < 1)) {
-            throw new UnavailableException("неправильно заданы параеметры запроса " +
+            throw new UnavailableException("неправильно заданы параметры запроса " +
                     "индекс " + from + " количество элементов " + size);
         }
         int page;

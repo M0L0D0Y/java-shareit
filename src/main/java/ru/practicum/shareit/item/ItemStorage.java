@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.storage;
+package ru.practicum.shareit.item;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface ItemStorage extends JpaRepository<Item, Long> {
     List<Item> findItemByOwnerId(long ownerId, Pageable pageable);
+
     List<Item> findAllItemByOwnerId(long ownerId);
 
     @Query(" select i from Item i " +
@@ -19,9 +20,6 @@ public interface ItemStorage extends JpaRepository<Item, Long> {
             " or upper(i.description) like upper(concat('%', ?1, '%'))" +
             " and i.available = true ")
     List<Item> searchItemByText(String text, Pageable pageable);
-
-    @Query("select i from Item i where i.requestId = ?1 and  i.available = true ")
-    List<Item> getAllItemByRequestId(long requestId);
 
     @Query("select i from Item i where i.requestId = ?1 and  i.available = true ")
     List<Item> getAllItemByRequestId(long requestId);
