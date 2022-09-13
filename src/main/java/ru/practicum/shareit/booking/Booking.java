@@ -32,6 +32,14 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     Status status;
 
+    public Booking(LocalDateTime start, LocalDateTime end, Long itemId, Long bookerId, Status status) {
+        this.start = start;
+        this.end = end;
+        this.itemId = itemId;
+        this.bookerId = bookerId;
+        this.status = status;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

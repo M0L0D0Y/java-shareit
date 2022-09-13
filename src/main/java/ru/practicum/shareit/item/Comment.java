@@ -29,6 +29,13 @@ public class Comment {
     @Column(name = "created")
     private LocalDateTime created;
 
+    public Comment(String text, Long itemId, Long authorId, LocalDateTime created) {
+        this.text = text;
+        this.itemId = itemId;
+        this.authorId = authorId;
+        this.created = created;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

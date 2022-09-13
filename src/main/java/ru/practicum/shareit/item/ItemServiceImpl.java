@@ -31,7 +31,8 @@ public class ItemServiceImpl implements ItemService {
     @Autowired
     public ItemServiceImpl(ItemStorage itemStorage,
                            UserStorage userStorage,
-                           CommentStorage commentStorage, BookingStorage bookingStorage) {
+                           CommentStorage commentStorage,
+                           BookingStorage bookingStorage) {
         this.itemStorage = itemStorage;
         this.userStorage = userStorage;
         this.commentStorage = commentStorage;
@@ -91,7 +92,9 @@ public class ItemServiceImpl implements ItemService {
         checkExistUser(userId);
         Pageable pageable = Page.getPageable(from, size);
         List<Item> items = itemStorage.findItemByOwnerId(userId, pageable);
-        items.sort((Comparator.comparing(Item::getId)));
+        if (items.size() > 1) {
+            items.sort((Comparator.comparing(Item::getId)));
+        }
         log.info("Все вещи пользователя с id = {} найдены", userId);
         return items;
     }
@@ -125,6 +128,7 @@ public class ItemServiceImpl implements ItemService {
         return savedCommit;
     }
 
+    @Override
     public List<Comment> getCommentsByItemID(long itemId) {
         return commentStorage.findByItemId(itemId);
     }
