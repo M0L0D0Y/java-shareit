@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,24 +49,17 @@ class ItemServiceImplTest {
         bookingStorage = mock(BookingStorage.class);
         itemRequestStorage = mock(ItemRequestStorage.class);
         itemService = new ItemServiceImpl(itemStorage, userStorage, commentStorage, bookingStorage);
-        user1 = new User("user1", "user1@mail.ru");
-        user1.setId(1L);
-        item1 = new Item("item1", "description1", true, user1.getId(), null);
-        item1.setId(1L);
-        itemRequest = new ItemRequest("description", user1.getId(), LocalDateTime.now());
-        itemRequest.setId(1L);
-        user2 = new User("user2", "user2@mail.ru");
-        user2.setId(2L);
-        item2 = new Item("item2", "description2", true, user2.getId(), itemRequest.getId());
-        item2.setId(2L);
-        booking = new Booking(
+        user1 = new User(1L, "user1", "user1@mail.ru");
+        item1 = new Item(1L, "item1", "description1", true, user1.getId(), null);
+        itemRequest = new ItemRequest(1L, "description", user1.getId(), LocalDateTime.now());
+        user2 = new User(2L, "user2", "user2@mail.ru");
+        item2 = new Item(2L, "item2", "description2", true, user2.getId(), itemRequest.getId());
+        booking = new Booking(1L,
                 LocalDateTime.of(2022, 8, 1, 12, 0),
                 LocalDateTime.of(2022, 8, 2, 12, 0),
                 item1.getId(), user2.getId(), Status.APPROVED);
-        booking.setId(1L);
-        comment = new Comment("text", item1.getId(), user2.getId(),
+        comment = new Comment(1L, "text", item1.getId(), user2.getId(),
                 LocalDateTime.now());
-        comment.setId(1L);
     }
 
     @AfterEach
@@ -165,7 +158,7 @@ class ItemServiceImplTest {
 
     @Test
     void updateItem() {
-        Item item = new Item("item", "description", false, user1.getId(), itemRequest.getId());
+        Item item = new Item(3L, "item", "description", false, user1.getId(), itemRequest.getId());
         item.setId(item1.getId());
         when(userStorage.findById(user1.getId()))
                 .thenReturn(Optional.ofNullable(user1));
@@ -352,18 +345,32 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void addCommit() {//TODO разобараться какого возвращает путой список List.of(booking)
-        when(userStorage.findById(user2.getId()))
-                .thenReturn(Optional.ofNullable(user2));
+    void addCommit() {
+        when(userStorage.findById(user1.getId()))
+                .thenReturn(Optional.ofNullable(user1));
         when(itemStorage.findById(item1.getId()))
                 .thenReturn(Optional.ofNullable(item1));
-        when(bookingStorage.findAllPastBookingsByBookerAndItemId(item1.getId(), user2.getId(), LocalDateTime.now()))
+        when(bookingStorage.findAllPastBookingsByBookerAndItemId(anyLong(), anyLong(), any(LocalDateTime.class)))
                 .thenReturn(List.of(booking));
         when(commentStorage.save(comment))
                 .thenReturn(comment);
-        final Comment savedCommit = itemService.addComment(user2.getId(), item1.getId(), comment);
+        final Comment savedCommit = itemService.addComment(user1.getId(), item1.getId(), comment);
         assertNotNull(savedCommit);
+        assertEquals(comment.getId(), savedCommit.getId());
+        assertEquals(comment.getText(), savedCommit.getText());
+        assertEquals(comment.getItemId(), savedCommit.getItemId());
+        assertEquals(comment.getAuthorId(), savedCommit.getAuthorId());
+        assertEquals(comment.getCreated(), savedCommit.getCreated());
+    }
 
+    @Test
+    void getCommentsByFalseItemID() {
+        long falseId = 1000L;
+        when(commentStorage.findByItemId(falseId))
+                .thenReturn(List.of());
+        List<Comment> comments = itemService.getCommentsByItemID(falseId);
+        assertNotNull(comments);
+        assertEquals(0, comments.size());
     }
 
     @Test
@@ -399,7 +406,5 @@ class ItemServiceImplTest {
         assertEquals(item2.getRequestId(), items.get(0).getRequestId());
         assertEquals(item2.getAvailable(), items.get(0).getAvailable());
         assertEquals(item2.getOwnerId(), items.get(0).getOwnerId());
-
-
     }
 }

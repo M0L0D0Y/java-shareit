@@ -14,4 +14,11 @@ public class InputItemDto {
     @NotNull(message = "Нет статуса аренды")
     private Boolean available;
     private Long requestId;
+
+    public InputItemDto(String name, String description, Boolean available, Long requestId) {
+        this.name = name;
+        this.description = description;
+        this.available = available;
+        this.requestId = requestId;
+    }
 }

@@ -32,7 +32,8 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     Status status;
 
-    public Booking(LocalDateTime start, LocalDateTime end, Long itemId, Long bookerId, Status status) {
+    public Booking(Long id, LocalDateTime start, LocalDateTime end, Long itemId, Long bookerId, Status status) {
+        this.id = id;
         this.start = start;
         this.end = end;
         this.itemId = itemId;

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.requests.ItemRequest;
 import ru.practicum.shareit.requests.ItemRequestStorage;
@@ -14,9 +13,9 @@ import ru.practicum.shareit.user.UserStorage;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DataJpaTest
 class ItemStorageTest {
@@ -26,8 +25,6 @@ class ItemStorageTest {
     ItemStorage itemStorage;
     @Autowired
     ItemRequestStorage itemRequestStorage;
-    @Autowired
-    private TestEntityManager entityManager;
     User user1;
     User user2;
     Item item1;
@@ -37,14 +34,15 @@ class ItemStorageTest {
 
     @BeforeEach
     void beforeEach() {
-        user1 = userStorage.save(new User("user1", "user1@mail.ru"));
+        user1 = userStorage.save(new User(1L, "user1", "user1@mail.ru"));
         item1 = itemStorage.save(
-                new Item("item1", "description1", true, user1.getId(), null));
+                new Item(1L, "item1", "description1", true, user1.getId(), null));
         itemRequest = itemRequestStorage.save(
-                new ItemRequest("description", user1.getId(), LocalDateTime.now()));
-        user2 = userStorage.save(new User("user2", "user2@mail.ru"));
+                new ItemRequest(1L, "description", user1.getId(), LocalDateTime.now()));
+        user2 = userStorage.save(new User(2L, "user2", "user2@mail.ru"));
         item2 = itemStorage.save(
-                new Item("item2", "description2", true, user2.getId(), itemRequest.getId()));
+                new Item(2L, "item2", "description2",
+                        true, user2.getId(), itemRequest.getId()));
 
     }
 
@@ -86,6 +84,7 @@ class ItemStorageTest {
         assertNotNull(byOwner);
         assertEquals(0, byOwner.size());
     }
+
     @Test
     void findAllItemByOwnerId() {
         final List<Item> byOwner = itemStorage.findAllItemByOwnerId(user1.getId());
@@ -103,11 +102,12 @@ class ItemStorageTest {
 
 
     @Test
-    void searchItemByFailText(){
+    void searchItemByFailText() {
         final List<Item> byText = itemStorage.searchItemByText("failText", Pageable.unpaged());
         assertNotNull(byText);
         assertEquals(0, byText.size());
     }
+
     @Test
     void searchItemByText() {
         final List<Item> byText = itemStorage.searchItemByText("Item1", Pageable.unpaged());
@@ -123,7 +123,7 @@ class ItemStorageTest {
     }
 
     @Test
-    void getAllItemByFailRequestId(){
+    void getAllItemByFailRequestId() {
         long failUserId = 1000L;
         final List<Item> byRequestId = itemStorage.getAllItemByRequestId(failUserId);
         assertNotNull(byRequestId);

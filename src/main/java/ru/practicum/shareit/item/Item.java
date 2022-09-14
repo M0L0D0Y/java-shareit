@@ -30,8 +30,8 @@ public class Item {
     @Column(name = "request_id")
     private Long requestId;
 
-    public Item(String name, String description, Boolean available, Long ownerId, Long requestId) {
-
+    public Item(Long id, String name, String description, Boolean available, Long ownerId, Long requestId) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.available = available;

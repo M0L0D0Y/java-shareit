@@ -10,4 +10,14 @@ public class OutputCommentDto {
     private String text;
     private String authorName;
     private LocalDateTime created;
+
+    public OutputCommentDto() {
+    }
+
+    public OutputCommentDto(Long id, String text, String authorName, LocalDateTime created) {
+        this.id = id;
+        this.text = text;
+        this.authorName = authorName;
+        this.created = created;
+    }
 }

@@ -28,7 +28,8 @@ public class ItemRequest {
     LocalDateTime created;
 
 
-    public ItemRequest(String description, Long requestor, LocalDateTime created) {
+    public ItemRequest(Long id, String description, Long requestor, LocalDateTime created) {
+        this.id = id;
         this.description = description;
         this.requestor = requestor;
         this.created = created;

@@ -114,7 +114,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Comment addComment(long userId, long itemId, Comment comment) {
         checkExistUser(userId);
-        getItem(userId, itemId);
+        checkExistItem(itemId);
         LocalDateTime dateTime = LocalDateTime.now();
         List<Booking> bookings = bookingStorage.findAllPastBookingsByBookerAndItemId(itemId, userId, dateTime);
         if (bookings.isEmpty()) {
@@ -144,5 +144,13 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Пользователя с таким id нет " + userId));
+    }
+
+    private void checkExistItem(long itemId) {
+        itemStorage.findById(itemId)
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("Нет вещи с таким id" + itemId));
+        log.info("Вещь с id = {} найдена", itemId);
     }
 }
