@@ -97,7 +97,6 @@ class ItemStorageTest {
         assertEquals(item1.getName(), foundItem.getName());
         assertEquals(item1.getDescription(), foundItem.getDescription());
         assertEquals(item1.getRequestId(), foundItem.getRequestId());
-
     }
 
 

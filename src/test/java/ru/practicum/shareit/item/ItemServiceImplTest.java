@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +19,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -60,15 +60,6 @@ class ItemServiceImplTest {
                 item1.getId(), user2.getId(), Status.APPROVED);
         comment = new Comment(1L, "text", item1.getId(), user2.getId(),
                 LocalDateTime.now());
-    }
-
-    @AfterEach
-    void afterEach() {
-        commentStorage.deleteAll();
-        bookingStorage.deleteAll();
-        itemRequestStorage.deleteAll();
-        itemStorage.deleteAll();
-        userStorage.deleteAll();
     }
 
     @Test

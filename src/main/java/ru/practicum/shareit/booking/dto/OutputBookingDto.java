@@ -15,4 +15,21 @@ public class OutputBookingDto {
     private OutputItemDto item;
     private OutputUserDto booker;
     private Status status;
+
+    public OutputBookingDto() {
+    }
+
+    public OutputBookingDto(Long id,
+                            LocalDateTime start,
+                            LocalDateTime end,
+                            OutputItemDto item,
+                            OutputUserDto booker,
+                            Status status) {
+        this.id = id;
+        this.start = start;
+        this.end = end;
+        this.item = item;
+        this.booker = booker;
+        this.status = status;
+    }
 }

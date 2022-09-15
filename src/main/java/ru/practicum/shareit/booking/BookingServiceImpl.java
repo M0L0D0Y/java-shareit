@@ -126,7 +126,7 @@ public class BookingServiceImpl implements BookingService {
                 log.info("Найдены все отклоненные брони пользователя");
                 break;
             case CURRENT:
-                bookings = bookingStorage.findAllCurrentBookingsByBookerId(userId, dateTime, dateTime, pageable);
+                bookings = bookingStorage.findAllCurrentBookingsByBookerId(userId, dateTime, pageable);
         }
         return bookings;
     }
@@ -163,7 +163,7 @@ public class BookingServiceImpl implements BookingService {
                     break;
                 case CURRENT:
                     bookings = bookingStorage
-                            .findAllCurrentBookingByIdOwnerItem(userId, currentDateTime, currentDateTime, pageable);
+                            .findAllCurrentBookingByIdOwnerItem(userId, currentDateTime, pageable);
                     break;
             }
         }

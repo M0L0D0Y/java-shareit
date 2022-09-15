@@ -33,11 +33,10 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
     List<Booking> findByStatusAllBookingsByBookerId(long bookerId, Status status, Pageable pageable);
 
     @Query("select b from Booking b " +
-            " where b.bookerId = ?1 and b.start < ?2 and b.end > ?3" +
+            " where b.bookerId = ?1 and b.start < ?2 and b.end > ?2" +
             " order by b.start desc ")
     List<Booking> findAllCurrentBookingsByBookerId(long bookerId,
-                                                   LocalDateTime dateTimeOne,
-                                                   LocalDateTime dateTimeTwo,
+                                                   LocalDateTime dateTime,
                                                    Pageable pageable);
 
     @Query("select b from Booking b " +
@@ -65,11 +64,10 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
 
     @Query("select b from Booking b " +
             " where b.itemId in(select i.id from Item i where i.ownerId = ?1)" +
-            " and b.start < ?2 and b.end > ?3" +
+            " and b.start < ?2 and b.end > ?2" +
             " order by b.start desc ")
     List<Booking> findAllCurrentBookingByIdOwnerItem(long itemId,
-                                                     LocalDateTime currentDateTimeOne,
-                                                     LocalDateTime currentDateTimeTwo,
+                                                     LocalDateTime currentDateTime,
                                                      Pageable pageable);
 
     List<Booking> findByItemId(long itemId);

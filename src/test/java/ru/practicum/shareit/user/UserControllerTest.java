@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.InputUserDto;
 import ru.practicum.shareit.user.dto.OutputUserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
@@ -109,7 +108,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.email").value(outputUserDto.getEmail()));
 
         verify(userService, times(1))
-                .updateUser(anyLong(), user);
+                .updateUser(1L, user);
     }
 
     @Test
