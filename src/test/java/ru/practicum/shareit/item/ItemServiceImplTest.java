@@ -15,6 +15,7 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserStorage;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -247,15 +248,22 @@ class ItemServiceImplTest {
         when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user2));
         when(itemStorage.findItemByOwnerId(anyLong(), any(Pageable.class)))
-                .thenReturn(List.of(item2));
+                .thenReturn(new ArrayList<>(List.of(item1,item2)));
         final List<Item> foundItems = itemService.getAllItem(user2.getId(), from, size);
         assertNotNull(foundItems);
-        assertEquals(item2.getId(), foundItems.get(0).getId());
-        assertEquals(item2.getName(), foundItems.get(0).getName());
-        assertEquals(item2.getDescription(), foundItems.get(0).getDescription());
-        assertEquals(item2.getAvailable(), foundItems.get(0).getAvailable());
-        assertEquals(item2.getOwnerId(), foundItems.get(0).getOwnerId());
-        assertEquals(item2.getRequestId(), foundItems.get(0).getRequestId());
+        assertEquals(2, foundItems.size());
+        assertEquals(item1.getId(), foundItems.get(0).getId());
+        assertEquals(item1.getName(), foundItems.get(0).getName());
+        assertEquals(item1.getDescription(), foundItems.get(0).getDescription());
+        assertEquals(item1.getAvailable(), foundItems.get(0).getAvailable());
+        assertEquals(item1.getOwnerId(), foundItems.get(0).getOwnerId());
+        assertEquals(item1.getRequestId(), foundItems.get(0).getRequestId());
+        assertEquals(item2.getId(), foundItems.get(1).getId());
+        assertEquals(item2.getName(), foundItems.get(1).getName());
+        assertEquals(item2.getDescription(), foundItems.get(1).getDescription());
+        assertEquals(item2.getAvailable(), foundItems.get(1).getAvailable());
+        assertEquals(item2.getOwnerId(), foundItems.get(1).getOwnerId());
+        assertEquals(item2.getRequestId(), foundItems.get(1).getRequestId());
     }
 
     @Test

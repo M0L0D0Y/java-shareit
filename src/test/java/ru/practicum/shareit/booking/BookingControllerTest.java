@@ -181,6 +181,20 @@ class BookingControllerTest {
     }
 
     @Test
+    void getBookingsByBookerIdEmptyList() throws Exception {
+        when(bookingService.getBookingsByBookerId(anyLong(), anyString(), anyInt(), anyInt()))
+                .thenReturn(List.of());
+        mockMvc.perform(get("/bookings")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .header(HEADER_USER_ID, "1"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(
+                        Collections.emptyList())));
+        verify(bookingService, times(1))
+                .getBookingsByBookerId(1L, "ALL", 0, 10);
+    }
+
+    @Test
     void getBookingsByBookerIdStatePast() throws Exception {
         when(bookingService.getBookingsByBookerId(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenReturn(List.of(booking));

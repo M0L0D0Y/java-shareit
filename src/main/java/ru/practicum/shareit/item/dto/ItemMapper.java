@@ -10,6 +10,7 @@ import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -71,13 +72,17 @@ public class ItemMapper {
         }
         List<Comment> comments = itemService.getCommentsByItemID(outputItemDto.getId());
         if (!comments.isEmpty()) {
-            comments.sort((o1, o2) -> o2.getId().compareTo(o1.getId()));
+            if (comments.size() > MIN_BOOKING_AMOUNT) {
+                comments.sort((o1, o2) -> o2.getId().compareTo(o1.getId()));
+            }
+            List<OutputCommentDto> outputCommentDtoList = comments
+                    .stream()
+                    .map(commentMapper::toOutputCommentDto)
+                    .collect(Collectors.toList());
+            outputItemDtoWithComment.setComments(outputCommentDtoList);
+            return outputItemDtoWithComment;
         }
-        List<OutputCommentDto> outputCommentDtoList = comments
-                .stream()
-                .map(commentMapper::toOutputCommentDto)
-                .collect(Collectors.toList());
-        outputItemDtoWithComment.setComments(outputCommentDtoList);
+        outputItemDtoWithComment.setComments(new ArrayList<>());
         return outputItemDtoWithComment;
 
     }
@@ -104,7 +109,7 @@ public class ItemMapper {
             List<Booking> allNextBookings = bookingService.findAllFutureBookingsByItemId(itemId, currentDateTime);
             if (!allNextBookings.isEmpty()) {
                 if (bookings.size() > MIN_BOOKING_AMOUNT) {
-                    bookings.sort((o1, o2) -> o2.getStart().compareTo(o1.getStart()));
+                    allNextBookings.sort((o1, o2) -> o2.getStart().compareTo(o1.getStart()));
                 }
                 BookingDto nextBooking = new BookingDto();
                 nextBooking.setId(allNextBookings.get(FIRST_BOOKING_INDEX).getId());

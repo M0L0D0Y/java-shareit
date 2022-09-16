@@ -53,7 +53,7 @@ public class BookingController {
                                                         @RequestParam(defaultValue = "0") int from,
                                                         @RequestParam(defaultValue = "10") int size) {
         List<Booking> bookingPage = bookingService.getBookingsByBookerId(userId, state, from, size);
-        if (bookingPage != null) {
+        if (!bookingPage.isEmpty()) {
             return bookingPage.stream()
                     .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
                     .collect(Collectors.toList());
@@ -67,7 +67,7 @@ public class BookingController {
                                                            @RequestParam(defaultValue = "0") int from,
                                                            @RequestParam(defaultValue = "10") int size) {
         List<Booking> bookingPage = bookingService.getBookingsByIdOwnerItem(userId, state, from, size);
-        if (bookingPage != null) {
+        if (!bookingPage.isEmpty()) {
             return bookingPage.stream()
                     .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
                     .collect(Collectors.toList());

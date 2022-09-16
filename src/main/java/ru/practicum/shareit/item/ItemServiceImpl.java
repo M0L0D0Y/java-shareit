@@ -93,7 +93,7 @@ public class ItemServiceImpl implements ItemService {
         Pageable pageable = Page.getPageable(from, size);
         List<Item> items = itemStorage.findItemByOwnerId(userId, pageable);
         if (items.size() > 1) {
-            items.sort((Comparator.comparing(Item::getId)));
+            items.sort(Comparator.comparing(Item::getId));
         }
         log.info("Все вещи пользователя с id = {} найдены", userId);
         return items;

@@ -66,6 +66,7 @@ class ItemRequestMapperTest {
                 dto.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
         assertEquals(outputItemRequestDto1.getItems().size(), dto.getItems().size());
     }
+
     @Test
     void toOutputItemRequestDtoListItem() {
         when(itemService.getAllItemByRequestId(anyLong(), anyLong()))

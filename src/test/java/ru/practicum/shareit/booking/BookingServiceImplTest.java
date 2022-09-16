@@ -348,7 +348,7 @@ class BookingServiceImplTest {
                 .findByStatusAllBookingsByBookerId(anyLong(), any(Status.class), any(Pageable.class)))
                 .thenReturn(List.of(booking1));
         final List<Booking> bookings = bookingService
-                .getBookingsByBookerId(user1.getId(), "WAITING", 0, 10);
+                .getBookingsByBookerId(user1.getId(), "REJECTED", 0, 10);
         assertNotNull(bookings);
         assertEquals(1, bookings.size());
         assertEquals(booking1.getId(), bookings.get(0).getId());
@@ -380,6 +380,26 @@ class BookingServiceImplTest {
 
     @Test
     void getBookingsByIdOwnerItemStateAll() {
+        when(userStorage.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user1));
+        when(itemStorage.findAllItemByOwnerId(anyLong()))
+                .thenReturn(List.of(item1));
+        when(bookingStorage.findByIdOwnerItem(anyLong(), any(Pageable.class)))
+                .thenReturn(List.of(booking1));
+        final List<Booking> bookings = bookingService
+                .getBookingsByIdOwnerItem(user1.getId(), "ALL", 0, 10);
+        assertNotNull(bookings);
+        assertEquals(1, bookings.size());
+        assertEquals(booking1.getId(), bookings.get(0).getId());
+        assertEquals(booking1.getStart(), bookings.get(0).getStart());
+        assertEquals(booking1.getEnd(), bookings.get(0).getEnd());
+        assertEquals(booking1.getStatus(), bookings.get(0).getStatus());
+        assertEquals(booking1.getItemId(), bookings.get(0).getItemId());
+        assertEquals(booking1.getBookerId(), bookings.get(0).getBookerId());
+    }
+
+    @Test
+    void getBookingsByIdOwnerItemState() {
         when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));
         when(itemStorage.findAllItemByOwnerId(anyLong()))
@@ -509,7 +529,7 @@ class BookingServiceImplTest {
         when(userStorage.findById(anyLong()))
                 .thenThrow(NotFoundException.class);
         assertThrows(NotFoundException.class, () -> bookingService
-                .getBookingsByBookerId(user1.getId(), "state", 0, 10));
+                .getBookingsByIdOwnerItem(user1.getId(), "state", 0, 10));
     }
 
     @Test
@@ -517,7 +537,7 @@ class BookingServiceImplTest {
         when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));
         assertThrows(UnsupportedStatusException.class, () -> bookingService
-                .getBookingsByBookerId(user1.getId(), "state", 0, 10));
+                .getBookingsByIdOwnerItem(user1.getId(), "state", 0, 10));
     }
 
     @Test
