@@ -30,7 +30,7 @@ class CommentMapperTest {
         commentMapper = new CommentMapper(userService);
         inputCommentDto = new InputCommentDto("comment");
         comment = new Comment(1L, "comment", 1L, 1L, LocalDateTime.now());
-        outputCommentDto = new OutputCommentDto(1L, "comment", "name", LocalDateTime.now());
+        outputCommentDto = new OutputCommentDto(1L, "comment", "name", comment.getCreated());
         user = new User(1L, "name", "email@mail.ru");
     }
 
