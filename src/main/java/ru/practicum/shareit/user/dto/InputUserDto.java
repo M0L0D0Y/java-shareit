@@ -12,4 +12,9 @@ public class InputUserDto {
     @NotBlank(message = "Нет email пользователя")
     @Email
     private String email;
+
+    public InputUserDto(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
 }

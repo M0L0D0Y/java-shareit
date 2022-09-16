@@ -82,11 +82,11 @@ class ItemControllerTest {
 
     @Test
     void addItem() throws Exception {
-        when(itemMapper.toItem(inputItemDto))
+        when(itemMapper.toItem(any(InputItemDto.class)))
                 .thenReturn(item);
-        when(itemService.addItem(user1Id, item))
+        when(itemService.addItem(anyLong(), any(Item.class)))
                 .thenReturn(item);
-        when(itemMapper.toOutputItemDto(item, user1Id))
+        when(itemMapper.toOutputItemDto(any(Item.class), anyLong()))
                 .thenReturn(outputItemDto);
 
         mockMvc.perform(post("/items")
@@ -120,11 +120,11 @@ class ItemControllerTest {
 
     @Test
     void updateItem() throws Exception {
-        when(itemMapper.toItem(inputItemDto))
+        when(itemMapper.toItem(any(InputItemDto.class)))
                 .thenReturn(item);
-        when(itemService.updateItem(user1Id, item.getId(), item))
+        when(itemService.updateItem(anyLong(), anyLong(), any(Item.class)))
                 .thenReturn(item);
-        when(itemMapper.toOutputItemDto(item, user1Id))
+        when(itemMapper.toOutputItemDto(any(Item.class), anyLong()))
                 .thenReturn(outputItemDto);
 
         mockMvc.perform(patch("/items/{id}", "1")
@@ -157,13 +157,13 @@ class ItemControllerTest {
 
     @Test
     void getItem() throws Exception {
-        when(itemMapper.toItem(inputItemDto))
+        when(itemMapper.toItem(any(InputItemDto.class)))
                 .thenReturn(item);
-        when(itemService.getItem(user1Id, item.getId()))
+        when(itemService.getItem(anyLong(), anyLong()))
                 .thenReturn(item);
-        when(itemMapper.toOutputItemDto(item, user1Id))
+        when(itemMapper.toOutputItemDto(any(Item.class), anyLong()))
                 .thenReturn(outputItemDto);
-        when(itemMapper.toOutputItemDtoWithComment(outputItemDto))
+        when(itemMapper.toOutputItemDtoWithComment(any(OutputItemDto.class)))
                 .thenReturn(outputItemDtoWithComment);
 
         mockMvc.perform(get("/items/{id}", "1")
@@ -196,11 +196,11 @@ class ItemControllerTest {
 
     @Test
     void getAllItem() throws Exception {
-        when(itemService.getAllItem(user1Id, from, size))
+        when(itemService.getAllItem(anyLong(), anyInt(), anyInt()))
                 .thenReturn(List.of(item));
-        when(itemMapper.toOutputItemDto(item, user1Id))
+        when(itemMapper.toOutputItemDto(any(Item.class), anyLong()))
                 .thenReturn(outputItemDto);
-        when(itemMapper.toOutputItemDtoWithComment(outputItemDto))
+        when(itemMapper.toOutputItemDtoWithComment(any(OutputItemDto.class)))
                 .thenReturn(outputItemDtoWithComment);
 
         mockMvc.perform(get("/items")
@@ -228,9 +228,9 @@ class ItemControllerTest {
     @Test
     void searchItemByNullText() throws Exception {
         String text = " ";
-        when(itemService.searchItemByText(user1Id, text, from, size))
+        when(itemService.searchItemByText(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenReturn(List.of());
-        when(itemMapper.toOutputItemDto(item, user1Id))
+        when(itemMapper.toOutputItemDto(any(Item.class), anyLong()))
                 .thenReturn(outputItemDto);
         mockMvc.perform(get("/items/search")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -248,9 +248,9 @@ class ItemControllerTest {
     @Test
     void searchItemByText() throws Exception {
         String text = "text";
-        when(itemService.searchItemByText(user1Id, text, from, size))
+        when(itemService.searchItemByText(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenReturn(List.of(item));
-        when(itemMapper.toOutputItemDto(item, user1Id))
+        when(itemMapper.toOutputItemDto(any(Item.class), anyLong()))
                 .thenReturn(outputItemDto);
         mockMvc.perform(get("/items/search")
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -267,11 +267,11 @@ class ItemControllerTest {
 
     @Test
     void addComment() throws Exception {
-        when(commentMapper.toComment(inputCommentDto))
+        when(commentMapper.toComment(any(InputCommentDto.class)))
                 .thenReturn(comment);
         when(itemService.addComment(anyLong(), anyLong(), any(Comment.class)))
                 .thenReturn(comment);
-        when(commentMapper.toOutputCommentDto(comment))
+        when(commentMapper.toOutputCommentDto(any(Comment.class)))
                 .thenReturn(outputCommentDto);
 
         mockMvc.perform(post("/items/{itemId}/comment", "1")

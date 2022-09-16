@@ -38,17 +38,9 @@ class UserControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        inputUser = new InputUserDto();
-        inputUser.setName("user");
-        inputUser.setEmail("user1@mail.ru");
-        user = new User();
-        user.setId(1L);
-        user.setName(inputUser.getName());
-        user.setEmail(inputUser.getEmail());
-        outputUserDto = new OutputUserDto();
-        outputUserDto.setId(1L);
-        outputUserDto.setName(inputUser.getName());
-        outputUserDto.setEmail(inputUser.getEmail());
+        user = new User(1L, "user", "user@mail.ru");
+        inputUser = new InputUserDto("user", "user@mail.ru");
+        outputUserDto = new OutputUserDto(1L, "user", "user@mail.ru");
     }
 
     @Test
@@ -66,11 +58,11 @@ class UserControllerTest {
 
     @Test
     void addUser() throws Exception {
-        when(userMapper.toUser(inputUser))
+        when(userMapper.toUser(any(InputUserDto.class)))
                 .thenReturn(user);
-        when(userService.addUser(user))
+        when(userService.addUser(any(User.class)))
                 .thenReturn(user);
-        when(userMapper.toOutputUserDto(user))
+        when(userMapper.toOutputUserDto(any(User.class)))
                 .thenReturn(outputUserDto);
 
         mockMvc.perform(post("/users")
@@ -90,11 +82,11 @@ class UserControllerTest {
 
     @Test
     void updateUser() throws Exception {
-        when(userMapper.toUser(inputUser))
+        when(userMapper.toUser(any(InputUserDto.class)))
                 .thenReturn(user);
         when(userService.updateUser(anyLong(), any(User.class)))
                 .thenReturn(user);
-        when(userMapper.toOutputUserDto(user))
+        when(userMapper.toOutputUserDto(any(User.class)))
                 .thenReturn(outputUserDto);
 
         mockMvc.perform(patch("/users/{id}", "1")
@@ -115,7 +107,7 @@ class UserControllerTest {
     void getUser() throws Exception {
         when(userService.getUser(anyLong()))
                 .thenReturn(user);
-        when(userMapper.toOutputUserDto(user))
+        when(userMapper.toOutputUserDto(any(User.class)))
                 .thenReturn(outputUserDto);
         mockMvc.perform(get("/users/{id}", "1")
                         .characterEncoding(StandardCharsets.UTF_8)

@@ -43,10 +43,6 @@ public class UserServiceImpl implements UserService {
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Пользователя с таким id нет " + userId));
         log.info("Пользователь для обновления найден по id = {}", userId);
-        if (user.getName() != null) {
-            userUpdate.setName(user.getName());
-            log.info("Обновили имя");
-        }
         if (user.getEmail() != null) {
             List<User> userList = userStorage.findAll();
             if (!(userList.isEmpty())) {
@@ -61,6 +57,10 @@ public class UserServiceImpl implements UserService {
         if ((user.getName() == null) && (user.getEmail() == null)) {
             log.info("Нет данных для обновления!");
             throw new UnavailableException("Нет данных для обновления!");
+        }
+        if (user.getName() != null) {
+            userUpdate.setName(user.getName());
+            log.info("Обновили имя");
         }
         log.info("Обновили email");
         User savedUserUpdate = userStorage.save(userUpdate);

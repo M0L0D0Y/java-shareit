@@ -1,15 +1,16 @@
 package ru.practicum.shareit.user;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnavailableException;
+import ru.practicum.shareit.exception.UserValidationException;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -26,36 +27,30 @@ class UserServiceImplTest {
         user = new User(1L, "user1", "user1@mail.ru");
     }
 
-    @AfterEach
-    void afterEach() {
-        userStorage.deleteAll();
-    }
-
-
     @Test
     void addUserNullName() {
-        when(userStorage.save(user))
+        when(userStorage.save(any(User.class)))
                 .thenThrow(new RuntimeException());
         assertThrows(RuntimeException.class, () -> userService.addUser(user));
     }
 
     @Test
     void addUserNullEmail() {
-        when(userStorage.save(user))
+        when(userStorage.save(any(User.class)))
                 .thenThrow(new RuntimeException());
         assertThrows(RuntimeException.class, () -> userService.addUser(user));
     }
 
     @Test
     void addUserDuplicateEmail() {
-        when(userStorage.save(user))
+        when(userStorage.save(any(User.class)))
                 .thenThrow(new RuntimeException());
         assertThrows(RuntimeException.class, () -> userService.addUser(user));
     }
 
     @Test
     void addUser() {
-        when(userStorage.save(user))
+        when(userStorage.save(any(User.class)))
                 .thenReturn(user);
         final User savedUser = userService.addUser(user);
         assertNotNull(savedUser);
@@ -98,7 +93,7 @@ class UserServiceImplTest {
     void updateUser() {
         when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(userStorage.save(user))
+        when(userStorage.save(any(User.class)))
                 .thenReturn(user);
 
         final User updateUser = userService.updateUser(user.getId(), user);
@@ -109,10 +104,27 @@ class UserServiceImplTest {
     }
 
     @Test
+    void updateUserFailUserId() {
+        when(userStorage.findById(anyLong()))
+                .thenThrow(NotFoundException.class);
+        assertThrows(NotFoundException.class, () -> userService.updateUser(user.getId(), user));
+    }
+
+    @Test
+    void updateUserDuplicateEmail() {
+        when(userStorage.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user));
+        when(userStorage.findAll())
+                .thenReturn(List.of(user));
+
+        assertThrows(UserValidationException.class, () -> userService.updateUser(user.getId(), user));
+    }
+
+    @Test
     void updateUserNullName() {
         when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user));
-        when(userStorage.save(user))
+        when(userStorage.save(any(User.class)))
                 .thenReturn(user);
 
         final User updateUser = userService.updateUser(user.getId(), user);
@@ -126,7 +138,7 @@ class UserServiceImplTest {
     void updateUserNullEmail() {
         when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.of(user));
-        when(userStorage.save(user))
+        when(userStorage.save(any(User.class)))
                 .thenReturn(user);
 
         final User updateUser = userService.updateUser(user.getId(), user);

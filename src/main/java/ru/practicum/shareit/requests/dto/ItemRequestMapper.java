@@ -2,11 +2,13 @@ package ru.practicum.shareit.requests.dto;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.dto.OutputItemDto;
 import ru.practicum.shareit.requests.ItemRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +29,11 @@ public class ItemRequestMapper {
         outputItemRequestDto.setId(itemRequest.getId());
         outputItemRequestDto.setDescription(itemRequest.getDescription());
         outputItemRequestDto.setCreated(itemRequest.getCreated());
-        List<OutputItemDto> itemDtoList = itemService.getAllItemByRequestId(userId, itemRequest.getId())
+        List<Item> itemList = itemService.getAllItemByRequestId(userId, itemRequest.getId());
+        if (itemList.isEmpty()) {
+            outputItemRequestDto.setItems(new ArrayList<>());
+        }
+        List<OutputItemDto> itemDtoList = itemList
                 .stream()
                 .map(item -> itemMapper.toOutputItemDto(item, userId))
                 .collect(Collectors.toList());

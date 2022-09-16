@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStorage;
 import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnavailableException;
 import ru.practicum.shareit.requests.ItemRequest;
@@ -14,13 +15,11 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserStorage;
 
 import java.time.LocalDateTime;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -53,7 +52,7 @@ class ItemServiceImplTest {
         item1 = new Item(1L, "item1", "description1", true, user1.getId(), null);
         itemRequest = new ItemRequest(1L, "description", user1.getId(), LocalDateTime.now());
         user2 = new User(2L, "user2", "user2@mail.ru");
-        item2 = new Item(2L, "item2", "description2", true, user2.getId(), itemRequest.getId());
+        item2 = new Item(2L, "item2", "description2", false, user2.getId(), itemRequest.getId());
         booking = new Booking(1L,
                 LocalDateTime.of(2022, 8, 1, 12, 0),
                 LocalDateTime.of(2022, 8, 2, 12, 0),
@@ -64,9 +63,9 @@ class ItemServiceImplTest {
 
     @Test
     void addItemNullRequestId() {
-        when(userStorage.findById(user1.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));
-        when(itemStorage.save(item1))
+        when(itemStorage.save(any(Item.class)))
                 .thenReturn(item1);
         final Item savedItem = itemService.addItem(user1.getId(), item1);
         assertNotNull(savedItem);
@@ -79,9 +78,9 @@ class ItemServiceImplTest {
 
     @Test
     void addItem() {
-        when(userStorage.findById(user1.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));
-        when(itemStorage.save(item2))
+        when(itemStorage.save(any(Item.class)))
                 .thenReturn(item2);
         final Item savedItem = itemService.addItem(user1.getId(), item2);
         assertNotNull(savedItem);
@@ -95,101 +94,114 @@ class ItemServiceImplTest {
 
     @Test
     void updateItemAvailable() {
-        Item item = new Item();
-        item.setId(item1.getId());
-        item.setAvailable(false);
-        when(userStorage.findById(user1.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));
-        when(itemStorage.findById(item1.getId()))
+        when(itemStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
-        when(itemStorage.save(item))
-                .thenReturn(item);
+        when(itemStorage.save(any(Item.class)))
+                .thenReturn(item2);
 
-        final Item updatedItem = itemService.updateItem(user1.getId(), item1.getId(), item);
+        final Item updatedItem = itemService.updateItem(user1.getId(), item1.getId(), item2);
         assertNotNull(updatedItem);
-        assertEquals(item1.getId(), updatedItem.getId());
-        assertEquals(item1.getAvailable(), updatedItem.getAvailable());
+        assertEquals(item2.getId(), updatedItem.getId());
+        assertEquals(item2.getAvailable(), updatedItem.getAvailable());
     }
 
     @Test
     void updateItemDescription() {
-        Item item = new Item();
-        item.setId(item1.getId());
-        item.setDescription("description");
-        when(userStorage.findById(user1.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));
-        when(itemStorage.findById(item1.getId()))
+        when(itemStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
-        when(itemStorage.save(item))
-                .thenReturn(item);
+        when(itemStorage.save(any(Item.class)))
+                .thenReturn(item2);
 
-        final Item updatedItem = itemService.updateItem(user1.getId(), item1.getId(), item);
+        final Item updatedItem = itemService.updateItem(user1.getId(), item1.getId(), item2);
         assertNotNull(updatedItem);
-        assertEquals(item1.getId(), updatedItem.getId());
-        assertEquals(item1.getDescription(), updatedItem.getDescription());
+        assertEquals(item2.getId(), updatedItem.getId());
+        assertEquals(item2.getDescription(), updatedItem.getDescription());
     }
 
     @Test
     void updateItemName() {
-        Item item = new Item();
-        item.setId(item1.getId());
-        item.setName("name");
-        when(userStorage.findById(user1.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));
-        when(itemStorage.findById(item1.getId()))
+        when(itemStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
-        when(itemStorage.save(item))
-                .thenReturn(item);
+        when(itemStorage.save(any(Item.class)))
+                .thenReturn(item2);
 
-        final Item updatedItem = itemService.updateItem(user1.getId(), item1.getId(), item);
+        final Item updatedItem = itemService.updateItem(user1.getId(), item1.getId(), item2);
         assertNotNull(updatedItem);
-        assertEquals(item1.getId(), updatedItem.getId());
-        assertEquals(item1.getName(), updatedItem.getName());
+        assertEquals(item2.getId(), updatedItem.getId());
+        assertEquals(item2.getName(), updatedItem.getName());
+    }
+
+    @Test
+    void updateItemNoRights() {
+        when(userStorage.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user1));
+        when(itemStorage.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(item2));
+
+        assertThrows(ForbiddenException.class, () -> itemService.updateItem(user1.getId(), item1.getId(), item2));
+    }
+
+    @Test
+    void updateItemFailUserId() {
+        when(userStorage.findById(anyLong()))
+                .thenThrow(NotFoundException.class);
+        assertThrows(NotFoundException.class, () -> itemService.updateItem(user1.getId(), item1.getId(), item2));
+    }
+
+    @Test
+    void updateItemFailItemId() {
+        when(userStorage.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user1));
+        when(itemStorage.findById(anyLong()))
+                .thenThrow(NotFoundException.class);
+        assertThrows(NotFoundException.class, () -> itemService.updateItem(user1.getId(), item1.getId(), item2));
     }
 
     @Test
     void updateItem() {
-        Item item = new Item(3L, "item", "description", false, user1.getId(), itemRequest.getId());
-        item.setId(item1.getId());
-        when(userStorage.findById(user1.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));
-        when(itemStorage.findById(item1.getId()))
+        when(itemStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
-        when(itemStorage.save(item))
-                .thenReturn(item);
+        when(itemStorage.save(any(Item.class)))
+                .thenReturn(item2);
 
-        final Item updatedItem = itemService.updateItem(user1.getId(), item1.getId(), item);
+        final Item updatedItem = itemService.updateItem(user1.getId(), item1.getId(), item2);
         assertNotNull(updatedItem);
-        assertEquals(item1.getId(), updatedItem.getId());
-        assertEquals(item1.getName(), updatedItem.getName());
-        assertEquals(item1.getDescription(), updatedItem.getDescription());
-        assertEquals(item1.getAvailable(), updatedItem.getAvailable());
-        assertEquals(item1.getOwnerId(), updatedItem.getOwnerId());
+        assertEquals(item2.getId(), updatedItem.getId());
+        assertEquals(item2.getName(), updatedItem.getName());
+        assertEquals(item2.getDescription(), updatedItem.getDescription());
+        assertEquals(item2.getAvailable(), updatedItem.getAvailable());
+        assertEquals(item2.getOwnerId(), updatedItem.getOwnerId());
     }
 
     @Test
     void getItemFailItemId() {
-        long failId = 1000L;
-        when(userStorage.findById(user1.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));
-        when(itemStorage.findById(item1.getId()))
-                .thenThrow(new NotFoundException("Нет вещи с таким id" + failId));
-        assertThrows(NotFoundException.class, () -> itemService.getItem(failId, item1.getId()));
+        when(itemStorage.findById(anyLong()))
+                .thenThrow(NotFoundException.class);
+        assertThrows(NotFoundException.class, () -> itemService.getItem(1L, item1.getId()));
     }
 
     @Test
     void getItemFailUserId() {
-        long failId = 1000L;
-        when(userStorage.findById(failId))
-                .thenThrow(new NotFoundException("Пользователя с таким id нет " + failId));
-        assertThrows(NotFoundException.class, () -> itemService.getItem(failId, item1.getId()));
+        when(userStorage.findById(anyLong()))
+                .thenThrow(NotFoundException.class);
+        assertThrows(NotFoundException.class, () -> itemService.getItem(1L, item1.getId()));
     }
 
     @Test
     void getItem() {
-        when(userStorage.findById(user2.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user2));
-        when(itemStorage.findById(item2.getId()))
+        when(itemStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item2));
         final Item foundItem = itemService.getItem(user2.getId(), item2.getId());
         assertNotNull(foundItem);
@@ -206,8 +218,7 @@ class ItemServiceImplTest {
         int from = 0;
         int size = -10;
         when(userStorage.findById(anyLong()))
-                .thenThrow(new UnavailableException("неправильно заданы параметры запроса " +
-                        "индекс " + from + " количество элементов " + size));
+                .thenThrow(UnavailableException.class);
         assertThrows(UnavailableException.class, () -> itemService.getAllItem(anyLong(), from, size));
     }
 
@@ -216,32 +227,29 @@ class ItemServiceImplTest {
         int from = -2;
         int size = 10;
         when(userStorage.findById(anyLong()))
-                .thenThrow(new UnavailableException("неправильно заданы параметры запроса " +
-                        "индекс " + from + " количество элементов " + size));
+                .thenThrow(UnavailableException.class);
         assertThrows(UnavailableException.class, () -> itemService.getAllItem(anyLong(), from, size));
     }
 
     @Test
     void getAllItemFailUserId() {
-        long failId = 1000L;
-        int from = -2;
+        int from = 0;
         int size = 10;
-        when(userStorage.findById(failId))
-                .thenThrow(new NotFoundException("Пользователя с таким id нет " + failId));
-        assertThrows(NotFoundException.class, () -> itemService.getAllItem(failId, from, size));
+        when(userStorage.findById(anyLong()))
+                .thenThrow(NotFoundException.class);
+        assertThrows(NotFoundException.class, () -> itemService.getAllItem(1L, from, size));
     }
 
     @Test
     void getAllItem() {
         int from = 0;
         int size = 10;
-        List<Item> items = List.of(item2);
-        when(userStorage.findById(user2.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user2));
-        when(itemStorage.findItemByOwnerId(user2.getId(), Pageable.ofSize(size)))
-                .thenReturn(items);
+        when(itemStorage.findItemByOwnerId(anyLong(), any(Pageable.class)))
+                .thenReturn(List.of(item2));
         final List<Item> foundItems = itemService.getAllItem(user2.getId(), from, size);
-        assertNotNull(items);
+        assertNotNull(foundItems);
         assertEquals(item2.getId(), foundItems.get(0).getId());
         assertEquals(item2.getName(), foundItems.get(0).getName());
         assertEquals(item2.getDescription(), foundItems.get(0).getDescription());
@@ -255,8 +263,7 @@ class ItemServiceImplTest {
         int from = 0;
         int size = -10;
         when(userStorage.findById(anyLong()))
-                .thenThrow(new UnavailableException("неправильно заданы параметры запроса " +
-                        "индекс " + from + " количество элементов " + size));
+                .thenThrow(UnavailableException.class);
         assertThrows(UnavailableException.class, () -> itemService.getAllItem(anyLong(), from, size));
     }
 
@@ -265,8 +272,7 @@ class ItemServiceImplTest {
         int from = -2;
         int size = 10;
         when(userStorage.findById(anyLong()))
-                .thenThrow(new UnavailableException("неправильно заданы параметры запроса " +
-                        "индекс " + from + " количество элементов " + size));
+                .thenThrow(UnavailableException.class);
         assertThrows(UnavailableException.class, () -> itemService.getAllItem(anyLong(), from, size));
     }
 
@@ -275,10 +281,8 @@ class ItemServiceImplTest {
         int from = 0;
         int size = 10;
         String text = " ";
-        when(userStorage.findById(user2.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user2));
-        when(itemStorage.searchItemByText(text, Pageable.unpaged()))
-                .thenReturn(new LinkedList<>());
         final List<Item> items = itemService.searchItemByText(user2.getId(), text, from, size);
         assertNotNull(items);
         assertEquals(0, items.size());
@@ -289,9 +293,9 @@ class ItemServiceImplTest {
         int from = 0;
         int size = 10;
         String text = "desc";
-        when(userStorage.findById(user2.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user2));
-        when(itemStorage.searchItemByText(text, Pageable.ofSize(size)))
+        when(itemStorage.searchItemByText(anyString(), any(Pageable.class)))
                 .thenReturn(List.of(item2));
         final List<Item> items = itemService.searchItemByText(user2.getId(), text, from, size);
         assertNotNull(items);
@@ -305,41 +309,39 @@ class ItemServiceImplTest {
 
     @Test
     void addCommentFailItemId() {
-        long failId = 1000L;
-        when(userStorage.findById(user1.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));
-        when(itemStorage.findById(failId))
-                .thenThrow(new NotFoundException("Нет вещи с таким id" + failId));
-        assertThrows(NotFoundException.class, () -> itemService.addComment(user1.getId(), failId, comment));
+        when(itemStorage.findById(anyLong()))
+                .thenThrow(NotFoundException.class);
+        assertThrows(NotFoundException.class, () -> itemService.addComment(user1.getId(), 1L, comment));
     }
 
     @Test
     void addCommentFailUserId() {
-        long failId = 1000L;
-        when(userStorage.findById(failId))
-                .thenThrow(new NotFoundException("Пользователя с таким id нет " + failId));
-        assertThrows(NotFoundException.class, () -> itemService.addComment(failId, item2.getId(), comment));
+        when(userStorage.findById(anyLong()))
+                .thenThrow(NotFoundException.class);
+        assertThrows(NotFoundException.class, () -> itemService.addComment(1L, item2.getId(), comment));
 
     }
 
     @Test
     void addCommentUnavailable() {
-        when(userStorage.findById(user1.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));
-        when(itemStorage.findById(item2.getId()))
+        when(itemStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item2));
-        when(bookingStorage.findAllPastBookingsByBookerAndItemId(item2.getId(), user1.getId(), LocalDateTime.now()))
+        when(bookingStorage.findAllPastBookingsByBookerAndItemId(anyLong(), anyLong(), any(LocalDateTime.class)))
                 .thenReturn(List.of(booking));
         when(commentStorage.save(comment))
-                .thenThrow(new UnavailableException("Пользователь не может оставить отзыв на эту вещь"));
+                .thenThrow(UnavailableException.class);
         assertThrows(UnavailableException.class, () -> itemService.addComment(user1.getId(), item2.getId(), comment));
     }
 
     @Test
     void addCommit() {
-        when(userStorage.findById(user1.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));
-        when(itemStorage.findById(item1.getId()))
+        when(itemStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
         when(bookingStorage.findAllPastBookingsByBookerAndItemId(anyLong(), anyLong(), any(LocalDateTime.class)))
                 .thenReturn(List.of(booking));
@@ -356,21 +358,20 @@ class ItemServiceImplTest {
 
     @Test
     void getCommentsByFalseItemID() {
-        long falseId = 1000L;
-        when(commentStorage.findByItemId(falseId))
+        when(commentStorage.findByItemId(anyLong()))
                 .thenReturn(List.of());
-        List<Comment> comments = itemService.getCommentsByItemID(falseId);
+        List<Comment> comments = itemService.getCommentsByItemID(1L);
         assertNotNull(comments);
         assertEquals(0, comments.size());
     }
 
     @Test
     void getCommentsByItemID() {
-        when(userStorage.findById(user2.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user2));
-        when(itemStorage.findById(item1.getId()))
+        when(itemStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
-        when(commentStorage.findByItemId(item1.getId()))
+        when(commentStorage.findByItemId(anyLong()))
                 .thenReturn(List.of(comment));
         final List<Comment> foundCommits = itemService.getCommentsByItemID(item1.getId());
         assertNotNull(foundCommits);
@@ -384,9 +385,9 @@ class ItemServiceImplTest {
 
     @Test
     void getAllItemByRequestId() {
-        when(userStorage.findById(user2.getId()))
+        when(userStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user2));
-        when(itemStorage.getAllItemByRequestId(itemRequest.getId()))
+        when(itemStorage.getAllItemByRequestId(anyLong()))
                 .thenReturn(List.of(item2));
         final List<Item> items = itemService.getAllItemByRequestId(user2.getId(), itemRequest.getId());
         assertNotNull(items);
