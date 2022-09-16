@@ -29,6 +29,7 @@ class ItemMapperTest {
     OutputItemDto outputItemDto;
     OutputItemDto outputItemDto1;
     OutputItemDto outputItemDto2;
+    OutputItemDto outputItemDto3;
     OutputItemDtoWithComment outputItemDtoWithComment1;
     OutputItemDtoWithComment outputItemDtoWithComment2;
     OutputItemDtoWithComment outputItemDtoWithComment3;
@@ -70,6 +71,8 @@ class ItemMapperTest {
                 true, null, bookingDto2, null);
         outputItemDto2 = new OutputItemDto(1L, "name", "description",
                 true, bookingDto1, null, null);
+        outputItemDto3 = new OutputItemDto(1L, "name", "description",
+                true, null, null, null);
         outputItemDtoWithComment1 = new OutputItemDtoWithComment(1L, "name", "description",
                 true, bookingDto1, bookingDto2, List.of(outputCommentDto1, outputCommentDto2));
         outputItemDtoWithComment2 = new OutputItemDtoWithComment(1L, "name", "description",
@@ -139,6 +142,22 @@ class ItemMapperTest {
         assertEquals(outputItemDto2.getLastBooking(), outputItemDto1.getLastBooking());
         assertEquals(outputItemDto2.getNextBooking(), outputItemDto1.getNextBooking());
         assertEquals(outputItemDto2.getAvailable(), outputItemDto1.getAvailable());
+    }
+
+    @Test
+    void toOutputItemDtoOwnerNullBooking() {
+        when(bookingService.getBookingsByItemId(anyLong()))
+                .thenReturn(List.of());
+        when(bookingService.getBookingsByItemId(anyLong()))
+                .thenReturn(List.of());
+
+        final OutputItemDto outputItemDto1 = itemMapper.toOutputItemDto(item, 1L);
+        assertEquals(outputItemDto3.getId(), outputItemDto1.getId());
+        assertEquals(outputItemDto3.getName(), outputItemDto1.getName());
+        assertEquals(outputItemDto3.getDescription(), outputItemDto1.getDescription());
+        assertEquals(outputItemDto3.getLastBooking(), outputItemDto1.getLastBooking());
+        assertEquals(outputItemDto3.getNextBooking(), outputItemDto1.getNextBooking());
+        assertEquals(outputItemDto3.getAvailable(), outputItemDto1.getAvailable());
     }
 
     @Test
