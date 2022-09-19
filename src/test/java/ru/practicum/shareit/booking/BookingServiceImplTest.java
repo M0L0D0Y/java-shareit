@@ -43,11 +43,11 @@ class BookingServiceImplTest {
         bookingStorage = mock(BookingStorage.class);
         bookingService = new BookingServiceImpl(bookingStorage, userStorage, itemStorage);
         user1 = new User(1L, "user1", "user1@mail.ru");
-        item1 = new Item(1L, "item1", "description1", true, user1.getId(), null);
+        item1 = new Item(1L, "item1", "description1", true, user1, null);
         user2 = new User(2L, "user2", "user2@mail.ru");
-        item2 = new Item(2L, "item2", "description2", true, user2.getId(), null);
+        item2 = new Item(2L, "item2", "description2", true, user2, null);
         user3 = new User(3L, "user3", "user3@mail.ru");
-        item3 = new Item(3L, "item3", "description3", false, user3.getId(), null);
+        item3 = new Item(3L, "item3", "description3", false, user3, null);
         booking1 = new Booking(1L,
                 LocalDateTime.of(2022, 8, 1, 12, 0),
                 LocalDateTime.of(2022, 8, 2, 12, 0),

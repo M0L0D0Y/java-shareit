@@ -31,7 +31,7 @@ class CommentStorageTest {
     void beforeEach() {
         user = userStorage.save(new User(1L, "user", "user@mail.ru"));
         item = itemStorage.save(
-                new Item(1L, "item", "description", true, user.getId(), null));
+                new Item(1L, "item", "description", true, user, null));
         comment = new Comment(1L, "comment", item.getId(), user.getId(), LocalDateTime.now());
         commentStorage.save(comment);
     }
@@ -44,14 +44,14 @@ class CommentStorageTest {
     @Test
     void findByFalseItemId() {
         long falseItemId = 1000L;
-        final List<Comment> comments = commentStorage.findByItemId(falseItemId);
+        final List<Comment> comments = commentStorage.findByItemIdOrderById(falseItemId);
         assertNotNull(comments);
         assertEquals(0, comments.size());
     }
 
     @Test
     void findByItemId() {
-        final List<Comment> comments = commentStorage.findByItemId(item.getId());
+        final List<Comment> comments = commentStorage.findByItemIdOrderById(item.getId());
         assertNotNull(comments);
         assertEquals(1, comments.size());
     }

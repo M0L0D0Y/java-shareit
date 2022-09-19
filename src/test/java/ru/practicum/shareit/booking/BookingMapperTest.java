@@ -45,7 +45,7 @@ class BookingMapperTest {
         userService = mock(UserServiceImpl.class);
         itemService = mock(ItemServiceImpl.class);
         bookingMapper = new BookingMapper(itemService, userService, userMapper, itemMapper);
-        item = new Item(1L, "name", "description", true, 1L, null);
+        item = new Item(1L, "name", "description", true, new User(), null);
         outputItemDto = new OutputItemDto(1L, "name", "description",
                 true, new BookingDto(), new BookingDto(), null);
         user = new User(1L, "user", "user@mail.ru");

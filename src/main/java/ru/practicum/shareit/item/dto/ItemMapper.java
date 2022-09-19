@@ -8,29 +8,33 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.requests.ItemRequest;
+import ru.practicum.shareit.requests.ItemRequestService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class ItemMapper {
     private static final byte FIRST_BOOKING_INDEX = 0;
-    private static final byte MIN_BOOKING_AMOUNT = 1;
+    private static final byte MIN_SIZE = 1;
 
     private final BookingService bookingService;
     private final ItemService itemService;
     private final CommentMapper commentMapper;
+    private final ItemRequestService itemRequestService;
 
     @Autowired
     public ItemMapper(BookingService bookingService,
                       ItemService itemService,
-                      CommentMapper commentMapper) {
+                      CommentMapper commentMapper,
+                      ItemRequestService itemRequestService) {
         this.bookingService = bookingService;
         this.itemService = itemService;
         this.commentMapper = commentMapper;
+        this.itemRequestService = itemRequestService;
     }
 
     public OutputItemDto toOutputItemDto(Item item, long userId) {
@@ -39,8 +43,11 @@ public class ItemMapper {
         outputItemDto.setName(item.getName());
         outputItemDto.setDescription(item.getDescription());
         outputItemDto.setAvailable(item.getAvailable());
-        outputItemDto.setRequestId(item.getRequestId());
-        if (userId == item.getOwnerId()) {
+        ItemRequest itemRequest = item.getRequest();
+        if (itemRequest != null) {
+            outputItemDto.setRequestId(item.getRequest().getId());
+        }
+        if (userId == item.getOwner().getId()) {
             LocalDateTime currentDateTime = LocalDateTime.now();
             addLastBooking(outputItemDto, item.getId(), currentDateTime);
             addNextBooking(outputItemDto, item.getId(), currentDateTime);
@@ -49,12 +56,17 @@ public class ItemMapper {
         return outputItemDto;
     }
 
-    public Item toItem(InputItemDto inputItemDto) {
+    public Item toItem(Long userId, InputItemDto inputItemDto) {
         Item item = new Item();
         item.setName(inputItemDto.getName());
         item.setDescription(inputItemDto.getDescription());
         item.setAvailable(inputItemDto.getAvailable());
-        item.setRequestId(inputItemDto.getRequestId());
+        if ((inputItemDto.getRequestId() != null) && (inputItemDto.getRequestId() > 0)) {
+            ItemRequest itemRequest = itemRequestService.getItemRequestById(userId, inputItemDto.getRequestId());
+            item.setRequest(itemRequest);
+        } else {
+            item.setRequest(null);
+        }
         return item;
     }
 
@@ -72,9 +84,6 @@ public class ItemMapper {
         }
         List<Comment> comments = itemService.getCommentsByItemID(outputItemDto.getId());
         if (!comments.isEmpty()) {
-            if (comments.size() > MIN_BOOKING_AMOUNT) {
-                comments.sort((o1, o2) -> o2.getId().compareTo(o1.getId()));
-            }
             List<OutputCommentDto> outputCommentDtoList = comments
                     .stream()
                     .map(commentMapper::toOutputCommentDto)
@@ -92,9 +101,6 @@ public class ItemMapper {
         if (!bookings.isEmpty()) {
             List<Booking> allLastBookings = bookingService.findAllPastBookingsByItemId(itemId, currentDateTime);
             if (!allLastBookings.isEmpty()) {
-                if (allLastBookings.size() > MIN_BOOKING_AMOUNT) {
-                    allLastBookings.sort(Comparator.comparing(Booking::getEnd));
-                }
                 BookingDto lastBooking = new BookingDto();
                 lastBooking.setId(allLastBookings.get(FIRST_BOOKING_INDEX).getId());
                 lastBooking.setBookerId(allLastBookings.get(FIRST_BOOKING_INDEX).getBookerId());
@@ -108,12 +114,10 @@ public class ItemMapper {
         if (!bookings.isEmpty()) {
             List<Booking> allNextBookings = bookingService.findAllFutureBookingsByItemId(itemId, currentDateTime);
             if (!allNextBookings.isEmpty()) {
-                if (bookings.size() > MIN_BOOKING_AMOUNT) {
-                    allNextBookings.sort((o1, o2) -> o2.getStart().compareTo(o1.getStart()));
-                }
                 BookingDto nextBooking = new BookingDto();
-                nextBooking.setId(allNextBookings.get(FIRST_BOOKING_INDEX).getId());
-                nextBooking.setBookerId(allNextBookings.get(FIRST_BOOKING_INDEX).getBookerId());
+                int lastElement = allNextBookings.size() - MIN_SIZE;
+                nextBooking.setId(allNextBookings.get(lastElement).getId());
+                nextBooking.setBookerId(allNextBookings.get(lastElement).getBookerId());
                 outputItemDto.setNextBooking(nextBooking);
             }
         }

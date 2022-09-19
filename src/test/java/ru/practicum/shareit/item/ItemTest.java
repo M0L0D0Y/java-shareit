@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
+import ru.practicum.shareit.user.User;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,7 +16,7 @@ class ItemTest {
 
     @Test
     void testComment() throws Exception {
-        Item item = new Item(1L, "name", "description", true, 1L, 2L);
+        Item item = new Item(1L, "name", "description", true, new User(), null);
 
         JsonContent<Item> result = json.write(item);
 
@@ -23,7 +24,7 @@ class ItemTest {
         assertThat(result).extractingJsonPathStringValue("$.name").isEqualTo("name");
         assertThat(result).extractingJsonPathStringValue("$.description").isEqualTo("description");
         assertThat(result).extractingJsonPathBooleanValue("$.available").isEqualTo(true);
-        assertThat(result).extractingJsonPathNumberValue("$.ownerId").isEqualTo(1);
-        assertThat(result).extractingJsonPathNumberValue("$.requestId").isEqualTo(2);
+        assertThat(result).extractingJsonPathNumberValue("$.ownerId").isEqualTo(null);
+        assertThat(result).extractingJsonPathNumberValue("$.requestId").isEqualTo(null);
     }
 }

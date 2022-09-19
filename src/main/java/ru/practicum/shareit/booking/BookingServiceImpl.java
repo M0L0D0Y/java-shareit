@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnavailableException;
 import ru.practicum.shareit.exception.UnsupportedStatusException;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
     private final BookingStorage bookingStorage;
     private final UserStorage userStorage;
@@ -32,13 +34,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public Booking addBooking(long userId, Booking booking) {
         checkExistUser(userId);
         Item item = checkExistItem(booking.getItemId());
         if (!item.getAvailable()) {
             throw new UnavailableException("Вещь недоступна для бронирования");
         }
-        if (userId == item.getOwnerId()) {
+        if (userId == item.getOwner().getId()) {
             throw new NotFoundException("Хозяин вещи не может брать в аренду свои вещи");
         }
         if (booking.getStart().isAfter(booking.getEnd())) {
@@ -52,6 +55,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public Booking confirmBookingByOwner(long userId, long bookingId, boolean approved) {
         checkExistUser(userId);
         Booking booking = bookingStorage.findById(bookingId)
@@ -59,7 +63,7 @@ public class BookingServiceImpl implements BookingService {
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Запроса на бронирование с таким id нет " + bookingId));
         Item item = checkExistItem(booking.getItemId());
-        if (userId != item.getOwnerId()) {
+        if (userId != item.getOwner().getId()) {
             throw new NotFoundException("Статус брони может подтвердить только владелец вещи");
         }
         if (booking.getStatus().equals(Status.APPROVED)) {
@@ -84,7 +88,7 @@ public class BookingServiceImpl implements BookingService {
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Запроса на бронирование с таким id нет " + bookingId));
         Item item = checkExistItem(booking.getItemId());
-        if ((userId != booking.getBookerId()) && (userId != item.getOwnerId())) {
+        if ((userId != booking.getBookerId()) && (userId != item.getOwner().getId())) {
             throw new NotFoundException("Бронь может посмотреть только владелец вещи или создатель брони");
         }
         log.info("Запрос на просмотр брони получен");

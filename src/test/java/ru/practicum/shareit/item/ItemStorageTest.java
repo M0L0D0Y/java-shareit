@@ -36,13 +36,13 @@ class ItemStorageTest {
     void beforeEach() {
         user1 = userStorage.save(new User(1L, "user1", "user1@mail.ru"));
         item1 = itemStorage.save(
-                new Item(1L, "item1", "description1", true, user1.getId(), null));
+                new Item(1L, "item1", "description1", true, user1, null));
         itemRequest = itemRequestStorage.save(
                 new ItemRequest(1L, "description", user1.getId(), LocalDateTime.now()));
         user2 = userStorage.save(new User(2L, "user2", "user2@mail.ru"));
         item2 = itemStorage.save(
                 new Item(2L, "item2", "description2",
-                        true, user2.getId(), itemRequest.getId()));
+                        true, user2, itemRequest));
 
     }
 
@@ -69,11 +69,11 @@ class ItemStorageTest {
         assertEquals(1, byOwner.size());
         Item foundItem = byOwner.get(0);
         assertEquals(item1.getId(), foundItem.getId());
-        assertEquals(item1.getOwnerId(), foundItem.getOwnerId());
+        assertEquals(item1.getOwner(), foundItem.getOwner());
         assertEquals(item1.getAvailable(), foundItem.getAvailable());
         assertEquals(item1.getName(), foundItem.getName());
         assertEquals(item1.getDescription(), foundItem.getDescription());
-        assertEquals(item1.getRequestId(), foundItem.getRequestId());
+        assertEquals(item1.getRequest(), foundItem.getRequest());
     }
 
 
@@ -92,11 +92,11 @@ class ItemStorageTest {
         assertEquals(1, byOwner.size());
         Item foundItem = byOwner.get(0);
         assertEquals(item1.getId(), foundItem.getId());
-        assertEquals(item1.getOwnerId(), foundItem.getOwnerId());
+        assertEquals(item1.getOwner(), foundItem.getOwner());
         assertEquals(item1.getAvailable(), foundItem.getAvailable());
         assertEquals(item1.getName(), foundItem.getName());
         assertEquals(item1.getDescription(), foundItem.getDescription());
-        assertEquals(item1.getRequestId(), foundItem.getRequestId());
+        assertEquals(item1.getRequest(), foundItem.getRequest());
     }
 
 
@@ -114,11 +114,11 @@ class ItemStorageTest {
         assertEquals(1, byText.size());
         Item foundItem = byText.get(0);
         assertEquals(item1.getId(), foundItem.getId());
-        assertEquals(item1.getOwnerId(), foundItem.getOwnerId());
+        assertEquals(item1.getOwner(), foundItem.getOwner());
         assertEquals(item1.getAvailable(), foundItem.getAvailable());
         assertEquals(item1.getName(), foundItem.getName());
         assertEquals(item1.getDescription(), foundItem.getDescription());
-        assertEquals(item1.getRequestId(), foundItem.getRequestId());
+        assertEquals(item1.getRequest(), foundItem.getRequest());
     }
 
     @Test
@@ -136,10 +136,10 @@ class ItemStorageTest {
         assertEquals(1, byRequestId.size());
         Item foundItem = byRequestId.get(0);
         assertEquals(item2.getId(), foundItem.getId());
-        assertEquals(item2.getOwnerId(), foundItem.getOwnerId());
+        assertEquals(item2.getOwner(), foundItem.getOwner());
         assertEquals(item2.getAvailable(), foundItem.getAvailable());
         assertEquals(item2.getName(), foundItem.getName());
         assertEquals(item2.getDescription(), foundItem.getDescription());
-        assertEquals(item2.getRequestId(), foundItem.getRequestId());
+        assertEquals(item2.getRequest(), foundItem.getRequest());
     }
 }

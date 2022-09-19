@@ -50,10 +50,10 @@ class ItemServiceImplTest {
         itemRequestStorage = mock(ItemRequestStorage.class);
         itemService = new ItemServiceImpl(itemStorage, userStorage, commentStorage, bookingStorage);
         user1 = new User(1L, "user1", "user1@mail.ru");
-        item1 = new Item(1L, "item1", "description1", true, user1.getId(), null);
+        item1 = new Item(1L, "item1", "description1", true, user1, null);
         itemRequest = new ItemRequest(1L, "description", user1.getId(), LocalDateTime.now());
         user2 = new User(2L, "user2", "user2@mail.ru");
-        item2 = new Item(2L, "item2", "description2", false, user2.getId(), itemRequest.getId());
+        item2 = new Item(2L, "item2", "description2", false, user2, itemRequest);
         booking = new Booking(1L,
                 LocalDateTime.of(2022, 8, 1, 12, 0),
                 LocalDateTime.of(2022, 8, 2, 12, 0),
@@ -74,7 +74,7 @@ class ItemServiceImplTest {
         assertEquals(item1.getName(), savedItem.getName());
         assertEquals(item1.getDescription(), savedItem.getDescription());
         assertEquals(item1.getAvailable(), savedItem.getAvailable());
-        assertEquals(item1.getOwnerId(), savedItem.getOwnerId());
+        assertEquals(item1.getOwner(), savedItem.getOwner());
     }
 
     @Test
@@ -89,8 +89,8 @@ class ItemServiceImplTest {
         assertEquals(item2.getName(), savedItem.getName());
         assertEquals(item2.getDescription(), savedItem.getDescription());
         assertEquals(item2.getAvailable(), savedItem.getAvailable());
-        assertEquals(item2.getOwnerId(), savedItem.getOwnerId());
-        assertEquals(item2.getRequestId(), savedItem.getRequestId());
+        assertEquals(item2.getOwner(), savedItem.getOwner());
+        assertEquals(item2.getRequest(), savedItem.getRequest());
     }
 
     @Test
@@ -179,7 +179,7 @@ class ItemServiceImplTest {
         assertEquals(item2.getName(), updatedItem.getName());
         assertEquals(item2.getDescription(), updatedItem.getDescription());
         assertEquals(item2.getAvailable(), updatedItem.getAvailable());
-        assertEquals(item2.getOwnerId(), updatedItem.getOwnerId());
+        assertEquals(item2.getOwner(), updatedItem.getOwner());
     }
 
     @Test
@@ -210,8 +210,8 @@ class ItemServiceImplTest {
         assertEquals(item2.getName(), foundItem.getName());
         assertEquals(item2.getDescription(), foundItem.getDescription());
         assertEquals(item2.getAvailable(), foundItem.getAvailable());
-        assertEquals(item2.getOwnerId(), foundItem.getOwnerId());
-        assertEquals(item2.getRequestId(), foundItem.getRequestId());
+        assertEquals(item2.getOwner(), foundItem.getOwner());
+        assertEquals(item2.getRequest(), foundItem.getRequest());
     }
 
     @Test
@@ -256,14 +256,14 @@ class ItemServiceImplTest {
         assertEquals(item1.getName(), foundItems.get(0).getName());
         assertEquals(item1.getDescription(), foundItems.get(0).getDescription());
         assertEquals(item1.getAvailable(), foundItems.get(0).getAvailable());
-        assertEquals(item1.getOwnerId(), foundItems.get(0).getOwnerId());
-        assertEquals(item1.getRequestId(), foundItems.get(0).getRequestId());
+        assertEquals(item1.getOwner(), foundItems.get(0).getOwner());
+        assertEquals(item1.getRequest(), foundItems.get(0).getRequest());
         assertEquals(item2.getId(), foundItems.get(1).getId());
         assertEquals(item2.getName(), foundItems.get(1).getName());
         assertEquals(item2.getDescription(), foundItems.get(1).getDescription());
         assertEquals(item2.getAvailable(), foundItems.get(1).getAvailable());
-        assertEquals(item2.getOwnerId(), foundItems.get(1).getOwnerId());
-        assertEquals(item2.getRequestId(), foundItems.get(1).getRequestId());
+        assertEquals(item2.getOwner(), foundItems.get(1).getOwner());
+        assertEquals(item2.getRequest(), foundItems.get(1).getRequest());
     }
 
     @Test
@@ -311,8 +311,8 @@ class ItemServiceImplTest {
         assertEquals(item2.getName(), items.get(0).getName());
         assertEquals(item2.getDescription(), items.get(0).getDescription());
         assertEquals(item2.getAvailable(), items.get(0).getAvailable());
-        assertEquals(item2.getOwnerId(), items.get(0).getOwnerId());
-        assertEquals(item2.getRequestId(), items.get(0).getRequestId());
+        assertEquals(item2.getOwner(), items.get(0).getOwner());
+        assertEquals(item2.getRequest(), items.get(0).getRequest());
     }
 
     @Test
@@ -366,7 +366,7 @@ class ItemServiceImplTest {
 
     @Test
     void getCommentsByFalseItemID() {
-        when(commentStorage.findByItemId(anyLong()))
+        when(commentStorage.findByItemIdOrderById(anyLong()))
                 .thenReturn(List.of());
         List<Comment> comments = itemService.getCommentsByItemID(1L);
         assertNotNull(comments);
@@ -379,7 +379,7 @@ class ItemServiceImplTest {
                 .thenReturn(Optional.ofNullable(user2));
         when(itemStorage.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item1));
-        when(commentStorage.findByItemId(anyLong()))
+        when(commentStorage.findByItemIdOrderById(anyLong()))
                 .thenReturn(List.of(comment));
         final List<Comment> foundCommits = itemService.getCommentsByItemID(item1.getId());
         assertNotNull(foundCommits);
@@ -403,8 +403,8 @@ class ItemServiceImplTest {
         assertEquals(item2.getId(), items.get(0).getId());
         assertEquals(item2.getName(), items.get(0).getName());
         assertEquals(item2.getDescription(), items.get(0).getDescription());
-        assertEquals(item2.getRequestId(), items.get(0).getRequestId());
+        assertEquals(item2.getRequest(), items.get(0).getRequest());
         assertEquals(item2.getAvailable(), items.get(0).getAvailable());
-        assertEquals(item2.getOwnerId(), items.get(0).getOwnerId());
+        assertEquals(item2.getOwner(), items.get(0).getOwner());
     }
 }

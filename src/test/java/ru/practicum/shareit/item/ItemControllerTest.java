@@ -14,6 +14,7 @@ import ru.practicum.shareit.booking.BookingStorage;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.user.User;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -56,7 +57,7 @@ class ItemControllerTest {
     @BeforeEach
     void beforeEach() {
         inputItemDto = new InputItemDto("name", "description", true, null);
-        item = new Item(1L, "name", "description", true, 1L, null);
+        item = new Item(1L, "name", "description", true, new User(), null);
         outputItemDto = new OutputItemDto(1L, "name", "description",
                 true, new BookingDto(), new BookingDto(), null);
         outputItemDtoWithComment = new OutputItemDtoWithComment(1L, "name", "description",
@@ -82,7 +83,7 @@ class ItemControllerTest {
 
     @Test
     void addItem() throws Exception {
-        when(itemMapper.toItem(any(InputItemDto.class)))
+        when(itemMapper.toItem(anyLong(),any(InputItemDto.class)))
                 .thenReturn(item);
         when(itemService.addItem(anyLong(), any(Item.class)))
                 .thenReturn(item);
@@ -120,7 +121,7 @@ class ItemControllerTest {
 
     @Test
     void updateItem() throws Exception {
-        when(itemMapper.toItem(any(InputItemDto.class)))
+        when(itemMapper.toItem(anyLong(), any(InputItemDto.class)))
                 .thenReturn(item);
         when(itemService.updateItem(anyLong(), anyLong(), any(Item.class)))
                 .thenReturn(item);
@@ -157,7 +158,7 @@ class ItemControllerTest {
 
     @Test
     void getItem() throws Exception {
-        when(itemMapper.toItem(any(InputItemDto.class)))
+        when(itemMapper.toItem(anyLong(), any(InputItemDto.class)))
                 .thenReturn(item);
         when(itemService.getItem(anyLong(), anyLong()))
                 .thenReturn(item);

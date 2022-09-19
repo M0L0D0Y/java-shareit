@@ -1,15 +1,19 @@
 package ru.practicum.shareit.requests;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.requests.dto.InputItemRequestDto;
 import ru.practicum.shareit.requests.dto.ItemRequestMapper;
 import ru.practicum.shareit.requests.dto.OutputItemRequestDto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Validated
 @RestController
 @RequestMapping(path = "/requests")
 public class ItemRequestController {
@@ -43,8 +47,8 @@ public class ItemRequestController {
 
     @GetMapping(value = "/all")
     public List<OutputItemRequestDto> getAllItemRequest(@RequestHeader(HEADER_USER_ID) Long userId,
-                                                        @RequestParam(defaultValue = "0") int from,
-                                                        @RequestParam(defaultValue = "10") int size) {
+                                                        @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                                        @Positive @RequestParam(defaultValue = "10") int size) {
         return itemRequestService.getAllItemRequest(userId, from, size)
                 .stream()
                 .map(itemRequest -> itemRequestMapper.toOutputItemRequestDto(userId, itemRequest))

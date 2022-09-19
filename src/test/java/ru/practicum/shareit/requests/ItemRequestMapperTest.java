@@ -11,6 +11,7 @@ import ru.practicum.shareit.item.dto.OutputItemDto;
 import ru.practicum.shareit.requests.dto.InputItemRequestDto;
 import ru.practicum.shareit.requests.dto.ItemRequestMapper;
 import ru.practicum.shareit.requests.dto.OutputItemRequestDto;
+import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -52,7 +53,7 @@ class ItemRequestMapperTest {
                 "description",
                 LocalDateTime.now(),
                 List.of(outputItemDto));
-        item = new Item(1L, "item", "description", true, 1L, null);
+        item = new Item(1L, "item", "description", true, new User(), null);
     }
 
     @Test

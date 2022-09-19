@@ -8,6 +8,9 @@ import ru.practicum.shareit.booking.BookingServiceImpl;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.requests.ItemRequestService;
+import ru.practicum.shareit.requests.ItemRequestServiceImpl;
+import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,6 +27,7 @@ class ItemMapperTest {
     BookingService bookingService;
     ItemService itemService;
     CommentMapper commentMapper;
+    ItemRequestService itemRequestService;
     InputItemDto inputItemDto;
     Item item;
     OutputItemDto outputItemDto;
@@ -42,15 +46,18 @@ class ItemMapperTest {
     Comment comment2;
     OutputCommentDto outputCommentDto1;
     OutputCommentDto outputCommentDto2;
+    User user1;
 
     @BeforeEach
     void beforeEach() {
         bookingService = mock(BookingServiceImpl.class);
         itemService = mock(ItemServiceImpl.class);
         commentMapper = mock(CommentMapper.class);
-        itemMapper = new ItemMapper(bookingService, itemService, commentMapper);
-        comment1 = new Comment(1L, "comment", 1L, 1L, LocalDateTime.now());
-        comment2 = new Comment(2L, "comment", 1L, 1L, LocalDateTime.now());
+        itemRequestService = mock(ItemRequestServiceImpl.class);
+        user1 = new User(1L, "user1", "user1@mail.ru");
+        itemMapper = new ItemMapper(bookingService, itemService, commentMapper, itemRequestService);
+        comment1 = new Comment(1L, "comment", 1L, user1.getId(), LocalDateTime.now());
+        comment2 = new Comment(2L, "comment", 1L, user1.getId(), LocalDateTime.now());
         outputCommentDto1 = new OutputCommentDto(1L, "comment", "name", LocalDateTime.now());
         outputCommentDto2 = new OutputCommentDto(2L, "comment", "name", LocalDateTime.now());
         booking1 = new Booking(1L,
@@ -64,7 +71,7 @@ class ItemMapperTest {
         bookingDto1 = new BookingDto(1L, 2L);
         bookingDto2 = new BookingDto(2L, 2L);
         inputItemDto = new InputItemDto("name", "description", true, null);
-        item = new Item(1L, "name", "description", true, 1L, null);
+        item = new Item(1L, "name", "description", true, user1, null);
         outputItemDto = new OutputItemDto(1L, "name", "description",
                 true, bookingDto1, bookingDto2, null);
         outputItemDto1 = new OutputItemDto(1L, "name", "description",
@@ -171,12 +178,13 @@ class ItemMapperTest {
         assertEquals(outputItemDto.getName(), outputItemDto1.getName());
         assertEquals(outputItemDto.getDescription(), outputItemDto1.getDescription());
         assertEquals(outputItemDto.getAvailable(), outputItemDto1.getAvailable());
-
     }
 
     @Test
     void toItem() {
-        Item item1 = itemMapper.toItem(inputItemDto);
+        when(itemRequestService.getItemRequestById(anyLong(), anyLong()))
+                .thenReturn(null);
+        Item item1 = itemMapper.toItem(1L, inputItemDto);
         assertEquals(item.getName(), item1.getName());
         assertEquals(item.getDescription(), item1.getDescription());
         assertEquals(item.getAvailable(), item1.getAvailable());

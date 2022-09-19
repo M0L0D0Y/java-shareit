@@ -153,7 +153,7 @@ class ItemRequestServiceImplTest {
         when(userStorage.findById(user1.getId()))
                 .thenThrow(new NotFoundException("Пользователя с таким id нет " + user1.getId()));
         assertThrows(NotFoundException.class,
-                () -> itemRequestService.getItemRequestById(user1.getId(), itemRequest.id));
+                () -> itemRequestService.getItemRequestById(user1.getId(), itemRequest.getId()));
     }
 
     @Test
@@ -163,7 +163,7 @@ class ItemRequestServiceImplTest {
         when(itemRequestStorage.findById(itemRequest.getId()))
                 .thenThrow(new NotFoundException("Нет запроса с таким id " + itemRequest.getId()));
         assertThrows(NotFoundException.class,
-                () -> itemRequestService.getItemRequestById(user1.getId(), itemRequest.id));
+                () -> itemRequestService.getItemRequestById(user1.getId(), itemRequest.getId()));
     }
 
     @Test
@@ -172,7 +172,7 @@ class ItemRequestServiceImplTest {
                 .thenReturn(Optional.ofNullable(user1));
         when(itemRequestStorage.findById(itemRequest.getId()))
                 .thenReturn(Optional.ofNullable(itemRequest));
-        final ItemRequest request = itemRequestService.getItemRequestById(user1.getId(), itemRequest.id);
+        final ItemRequest request = itemRequestService.getItemRequestById(user1.getId(), itemRequest.getId());
         assertNotNull(request);
         assertEquals(itemRequest.getId(), request.getId());
         assertEquals(itemRequest.getDescription(), request.getDescription());

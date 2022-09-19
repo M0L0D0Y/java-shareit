@@ -35,7 +35,7 @@ class ItemRequestStorageTest {
     void beforeEach() {
         user1 = userStorage.save(new User(1L, "user1", "user1@mail.ru"));
         item1 = itemStorage.save(
-                new Item(1L, "item1", "description1", true, user1.getId(), null));
+                new Item(1L, "item1", "description1", true, user1, null));
         itemRequest = itemRequestStorage.save(
                 new ItemRequest(1L, "description", user1.getId(), LocalDateTime.now()));
         user2 = userStorage.save(new User(2L, "user2", "user2@mail.ru"));

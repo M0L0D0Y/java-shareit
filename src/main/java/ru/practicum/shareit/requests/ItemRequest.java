@@ -1,7 +1,6 @@
 package ru.practicum.shareit.requests;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -11,20 +10,22 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @Entity
 @Table(name = "requests")
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
     @Column(name = "description")
-    String description;
+    private String description;
     @Column(name = "requestor_id")
-    Long requestor;
+    private Long requestor;
     @Column(name = "created")
-    LocalDateTime created;
+    private LocalDateTime created;
 
+    public ItemRequest() {
+
+    }
 
     public ItemRequest(Long id, String description, Long requestor, LocalDateTime created) {
         this.id = id;
@@ -32,6 +33,7 @@ public class ItemRequest {
         this.requestor = requestor;
         this.created = created;
     }
+
 
 }
 
