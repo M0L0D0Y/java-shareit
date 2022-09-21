@@ -15,4 +15,22 @@ public class OutputItemDtoWithComment {
     private BookingDto nextBooking;
     private List<OutputCommentDto> comments;
 
+    public OutputItemDtoWithComment() {
+    }
+
+    public OutputItemDtoWithComment(Long id,
+                                    String name,
+                                    String description,
+                                    Boolean available,
+                                    BookingDto lastBooking,
+                                    BookingDto nextBooking,
+                                    List<OutputCommentDto> comments) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.available = available;
+        this.lastBooking = lastBooking;
+        this.nextBooking = nextBooking;
+        this.comments = comments;
+    }
 }

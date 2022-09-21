@@ -2,23 +2,25 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStorage;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnavailableException;
-import ru.practicum.shareit.item.storage.CommentStorage;
-import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.requests.Page;
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserStorage;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
     private static final String EMPTY_STRING = "";
     private static final String SPACE_STRING = " ";
@@ -31,7 +33,8 @@ public class ItemServiceImpl implements ItemService {
     @Autowired
     public ItemServiceImpl(ItemStorage itemStorage,
                            UserStorage userStorage,
-                           CommentStorage commentStorage, BookingStorage bookingStorage) {
+                           CommentStorage commentStorage,
+                           BookingStorage bookingStorage) {
         this.itemStorage = itemStorage;
         this.userStorage = userStorage;
         this.commentStorage = commentStorage;
@@ -39,15 +42,17 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public Item addItem(long userId, Item item) {
-        checkExistUser(userId);
-        item.setOwnerId(userId);
+        User user = checkExistUser(userId);
+        item.setOwner(user);
         Item savedItem = itemStorage.save(item);
         log.info("Вещь сохранена");
         return savedItem;
     }
 
     @Override
+    @Transactional
     public Item updateItem(long userId, long itemId, Item item) {
         checkExistUser(userId);
         Item updateItem = itemStorage.findById(itemId)
@@ -55,7 +60,7 @@ public class ItemServiceImpl implements ItemService {
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Вещи с таким id нет " + itemId));
         log.info("Вещь для обновления найдена по id = {}", itemId);
-        if (updateItem.getOwnerId() != userId) {
+        if (updateItem.getOwner().getId() != userId) {
             throw new ForbiddenException("Нет прав для изменения вещи");
         }
         if (item.getName() != null) {
@@ -87,29 +92,31 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> getAllItem(long userId) {
+    public List<Item> getAllItem(long userId, int from, int size) {
         checkExistUser(userId);
-        List<Item> items = itemStorage.findItemByOwnerId(userId);
-        items.sort((Comparator.comparing(Item::getId)));
+        Pageable pageable = Page.getPageable(from, size);
+        List<Item> items = itemStorage.findItemByOwnerId(userId, pageable);
         log.info("Все вещи пользователя с id = {} найдены", userId);
         return items;
     }
 
     @Override
-    public List<Item> searchItemByText(long userId, String text) {
+    public List<Item> searchItemByText(long userId, String text, int from, int size) {
         checkExistUser(userId);
         if (text.equals(EMPTY_STRING) || text.equals(SPACE_STRING)) {
             return new LinkedList<>();
         }
-        List<Item> items = itemStorage.searchItemByText(text);
+        Pageable pageable = Page.getPageable(from, size);
+        List<Item> items = itemStorage.searchItemByText(text, pageable);
         log.info("Вещи по запросу = {} найдены", text);
         return items;
     }
 
     @Override
+    @Transactional
     public Comment addComment(long userId, long itemId, Comment comment) {
         checkExistUser(userId);
-        getItem(userId, itemId);
+        checkExistItem(itemId);
         LocalDateTime dateTime = LocalDateTime.now();
         List<Booking> bookings = bookingStorage.findAllPastBookingsByBookerAndItemId(itemId, userId, dateTime);
         if (bookings.isEmpty()) {
@@ -123,14 +130,29 @@ public class ItemServiceImpl implements ItemService {
         return savedCommit;
     }
 
+    @Override
     public List<Comment> getCommentsByItemID(long itemId) {
-        return commentStorage.findByItemId(itemId);
+        return commentStorage.findByItemIdOrderById(itemId);
     }
 
-    private void checkExistUser(long userId) {
-        userStorage.findById(userId)
+    @Override
+    public List<Item> getAllItemByRequestId(long userId, long requestId) {
+        checkExistUser(userId);
+        return itemStorage.getAllItemByRequestId(requestId);
+    }
+
+    private User checkExistUser(long userId) {
+        return userStorage.findById(userId)
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Пользователя с таким id нет " + userId));
+    }
+
+    private void checkExistItem(long itemId) {
+        itemStorage.findById(itemId)
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("Нет вещи с таким id" + itemId));
+        log.info("Вещь с id = {} найдена", itemId);
     }
 }

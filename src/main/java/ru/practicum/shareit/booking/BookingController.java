@@ -1,15 +1,20 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.InputBookingDto;
 import ru.practicum.shareit.booking.dto.OutputBookingDto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Validated
 @RestController
 @RequestMapping(path = "/bookings")
 public class BookingController {
@@ -34,8 +39,8 @@ public class BookingController {
 
     @PatchMapping(value = "/{bookingId}")
     public OutputBookingDto confirmBookingByOwner(@RequestHeader(HEADER_USER_ID) long userId,
-                                           @PathVariable Long bookingId,
-                                           @RequestParam Boolean approved) {
+                                                  @PathVariable Long bookingId,
+                                                  @RequestParam Boolean approved) {
         return bookingMapper.toOutputBookingDto(bookingService.confirmBookingByOwner(userId, bookingId, approved), userId);
 
     }
@@ -48,20 +53,29 @@ public class BookingController {
 
     @GetMapping()
     public List<OutputBookingDto> getBookingsByBookerId(@RequestHeader(HEADER_USER_ID) long userId,
-                                                    @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getBookingsByBookerId(userId, state)
-                .stream()
-                .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
-                .collect(Collectors.toList());
-
+                                                        @RequestParam(defaultValue = "ALL") String state,
+                                                        @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                                        @Positive @RequestParam(defaultValue = "10") int size) {
+        List<Booking> bookingPage = bookingService.getBookingsByBookerId(userId, state, from, size);
+        if (!bookingPage.isEmpty()) {
+            return bookingPage.stream()
+                    .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
     @GetMapping(value = "/owner")
     public List<OutputBookingDto> getBookingsByIdOwnerItem(@RequestHeader(HEADER_USER_ID) long userId,
-                                                   @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getBookingsByIdOwnerItem(userId, state)
-                .stream()
-                .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
-                .collect(Collectors.toList());
+                                                           @RequestParam(defaultValue = "ALL") String state,
+                                                           @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                                           @Positive @RequestParam(defaultValue = "10") int size) {
+        List<Booking> bookingPage = bookingService.getBookingsByIdOwnerItem(userId, state, from, size);
+        if (!bookingPage.isEmpty()) {
+            return bookingPage.stream()
+                    .map(booking -> bookingMapper.toOutputBookingDto(booking, userId))
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }

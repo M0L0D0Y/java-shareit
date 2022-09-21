@@ -16,4 +16,13 @@ public class InputBookingDto {
     private LocalDateTime end;
     @NotNull
     private Long itemId;
+
+    public InputBookingDto() {
+    }
+
+    public InputBookingDto(LocalDateTime start, LocalDateTime end, Long itemId) {
+        this.start = start;
+        this.end = end;
+        this.itemId = itemId;
+    }
 }

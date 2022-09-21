@@ -1,11 +1,12 @@
 package ru.practicum.shareit.item;
 
-import lombok.*;
-import org.hibernate.Hibernate;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -26,16 +27,12 @@ public class Comment {
     @Column(name = "created")
     private LocalDateTime created;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Comment comment = (Comment) o;
-        return id != null && Objects.equals(id, comment.id);
+    public Comment(Long id, String text, Long itemId, Long authorId, LocalDateTime created) {
+        this.id = id;
+        this.text = text;
+        this.itemId = itemId;
+        this.authorId = authorId;
+        this.created = created;
     }
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

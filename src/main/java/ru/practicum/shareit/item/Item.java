@@ -4,10 +4,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.Hibernate;
+import ru.practicum.shareit.requests.ItemRequest;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -25,21 +25,19 @@ public class Item {
     private String description;
     @Column(name = "available")
     private Boolean available;
-    @Column(name = "owner_id")
-    private Long ownerId;
-    @Column(name = "request_id")
-    private Long requestId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+    @ManyToOne
+    @JoinColumn(name = "request_id")
+    private ItemRequest request;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Item item = (Item) o;
-        return id != null && Objects.equals(id, item.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
+    public Item(Long id, String name, String description, Boolean available, User owner, ItemRequest request) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.available = available;
+        this.owner = owner;
+        this.request = request;
     }
 }

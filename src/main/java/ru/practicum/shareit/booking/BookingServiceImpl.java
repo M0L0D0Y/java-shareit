@@ -2,20 +2,23 @@ package ru.practicum.shareit.booking;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnavailableException;
 import ru.practicum.shareit.exception.UnsupportedStatusException;
 import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.item.ItemStorage;
+import ru.practicum.shareit.requests.Page;
 import ru.practicum.shareit.user.UserStorage;
 
 import java.time.LocalDateTime;
-import java.util.LinkedList;
 import java.util.List;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
     private final BookingStorage bookingStorage;
     private final UserStorage userStorage;
@@ -31,13 +34,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public Booking addBooking(long userId, Booking booking) {
         checkExistUser(userId);
         Item item = checkExistItem(booking.getItemId());
         if (!item.getAvailable()) {
             throw new UnavailableException("Вещь недоступна для бронирования");
         }
-        if (userId == item.getOwnerId()) {
+        if (userId == item.getOwner().getId()) {
             throw new NotFoundException("Хозяин вещи не может брать в аренду свои вещи");
         }
         if (booking.getStart().isAfter(booking.getEnd())) {
@@ -51,6 +55,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public Booking confirmBookingByOwner(long userId, long bookingId, boolean approved) {
         checkExistUser(userId);
         Booking booking = bookingStorage.findById(bookingId)
@@ -58,7 +63,7 @@ public class BookingServiceImpl implements BookingService {
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Запроса на бронирование с таким id нет " + bookingId));
         Item item = checkExistItem(booking.getItemId());
-        if (userId != item.getOwnerId()) {
+        if (userId != item.getOwner().getId()) {
             throw new NotFoundException("Статус брони может подтвердить только владелец вещи");
         }
         if (booking.getStatus().equals(Status.APPROVED)) {
@@ -83,7 +88,7 @@ public class BookingServiceImpl implements BookingService {
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Запроса на бронирование с таким id нет " + bookingId));
         Item item = checkExistItem(booking.getItemId());
-        if ((userId != booking.getBookerId()) && (userId != item.getOwnerId())) {
+        if ((userId != booking.getBookerId()) && (userId != item.getOwner().getId())) {
             throw new NotFoundException("Бронь может посмотреть только владелец вещи или создатель брони");
         }
         log.info("Запрос на просмотр брони получен");
@@ -91,7 +96,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingsByBookerId(long userId, String state) {
+    public List<Booking> getBookingsByBookerId(long userId, String state, int from, int size) {
         checkExistUser(userId);
         State getState;
         try {
@@ -99,37 +104,39 @@ public class BookingServiceImpl implements BookingService {
         } catch (IllegalArgumentException e) {
             throw new UnsupportedStatusException("Неподдерживаемый статус " + state);
         }
+        Pageable pageable = Page.getPageable(from, size);
         LocalDateTime dateTime = LocalDateTime.now();
         List<Booking> bookings = null;
         switch (getState) {
             case ALL:
-                bookings = bookingStorage.findAllBookingsByBookerId(userId);
+                bookings = bookingStorage.findAllBookingsByBookerId(userId, pageable);
                 log.info("Найдены все брони пользователя");
+                System.out.println(bookings);
                 break;
             case PAST:
-                bookings = bookingStorage.findAllPastBookingsByBookerId(userId, dateTime);
+                bookings = bookingStorage.findAllPastBookingsByBookerId(userId, dateTime, pageable);
                 log.info("Найдены все завершенные брони пользователя");
                 break;
             case FUTURE:
-                bookings = bookingStorage.findAllFutureBookingsByBookerId(userId, dateTime);
+                bookings = bookingStorage.findAllFutureBookingsByBookerId(userId, dateTime, pageable);
                 log.info("Найдены все будущие брони пользователя");
                 break;
             case WAITING:
-                bookings = bookingStorage.findByStatusAllBookingsByBookerId(userId, Status.WAITING);
+                bookings = bookingStorage.findByStatusAllBookingsByBookerId(userId, Status.WAITING, pageable);
                 log.info("Найдены все брони пользователя, ожидающие подтверждения");
                 break;
             case REJECTED:
-                bookings = bookingStorage.findByStatusAllBookingsByBookerId(userId, Status.REJECTED);
+                bookings = bookingStorage.findByStatusAllBookingsByBookerId(userId, Status.REJECTED, pageable);
                 log.info("Найдены все отклоненные брони пользователя");
                 break;
             case CURRENT:
-                bookings = bookingStorage.findAllCurrentBookingsByBookerId(userId, dateTime, dateTime);
+                bookings = bookingStorage.findAllCurrentBookingsByBookerId(userId, dateTime, pageable);
         }
         return bookings;
     }
 
     @Override
-    public List<Booking> getBookingsByIdOwnerItem(long userId, String state) {
+    public List<Booking> getBookingsByIdOwnerItem(long userId, String state, int from, int size) {
         checkExistUser(userId);
         State getState;
         try {
@@ -137,29 +144,30 @@ public class BookingServiceImpl implements BookingService {
         } catch (IllegalArgumentException e) {
             throw new UnsupportedStatusException("Неподдерживаемый статус");
         }
-        List<Booking> bookings = new LinkedList<>();
-        List<Item> items = itemStorage.findItemByOwnerId(userId);
+        Pageable pageable = Page.getPageable(from, size);
+        List<Booking> bookings = null;
+        List<Item> items = itemStorage.findAllItemByOwnerId(userId);
         LocalDateTime currentDateTime = LocalDateTime.now();
         if (!items.isEmpty()) {
             switch (getState) {
                 case ALL:
-                    bookings = bookingStorage.findByIdOwnerItem(userId);
+                    bookings = bookingStorage.findByIdOwnerItem(userId, pageable);
                     break;
                 case PAST:
-                    bookings = bookingStorage.findAllPastBookingsByIdOwnerItem(userId, currentDateTime);
+                    bookings = bookingStorage.findAllPastBookingsByIdOwnerItem(userId, currentDateTime, pageable);
                     break;
                 case FUTURE:
-                    bookings = bookingStorage.findAllFutureBookingsByIdOwnerItem(userId, currentDateTime);
+                    bookings = bookingStorage.findAllFutureBookingsByIdOwnerItem(userId, currentDateTime, pageable);
                     break;
                 case WAITING:
-                    bookings = bookingStorage.findByIdOwnerItemAndStatusIs(userId, Status.WAITING);
+                    bookings = bookingStorage.findByIdOwnerItemAndStatusIs(userId, Status.WAITING, pageable);
                     break;
                 case REJECTED:
-                    bookings = bookingStorage.findByIdOwnerItemAndStatusIs(userId, Status.REJECTED);
+                    bookings = bookingStorage.findByIdOwnerItemAndStatusIs(userId, Status.REJECTED, pageable);
                     break;
                 case CURRENT:
                     bookings = bookingStorage
-                            .findAllCurrentBookingByIdOwnerItem(userId, currentDateTime, currentDateTime);
+                            .findAllCurrentBookingByIdOwnerItem(userId, currentDateTime, pageable);
                     break;
             }
         }

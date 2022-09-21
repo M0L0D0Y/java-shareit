@@ -1,13 +1,17 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Validated
 @RestController
 @RequestMapping("/items")
 public class ItemController {
@@ -30,7 +34,7 @@ public class ItemController {
     @PostMapping
     public OutputItemDto addItem(@RequestHeader(HEADER_USER_ID) Long userId,
                                  @Valid @RequestBody InputItemDto inputItemDto) {
-        Item item = itemMapper.toItem(inputItemDto);
+        Item item = itemMapper.toItem(userId, inputItemDto);
         return itemMapper.toOutputItemDto(itemService.addItem(userId, item), userId);
     }
 
@@ -38,7 +42,7 @@ public class ItemController {
     public OutputItemDto updateItem(@RequestHeader(HEADER_USER_ID) Long userId,
                                     @PathVariable Long itemId,
                                     @RequestBody InputItemDto itemDto) {
-        Item item = itemMapper.toItem(itemDto);
+        Item item = itemMapper.toItem(userId, itemDto);
         return itemMapper.toOutputItemDto(itemService.updateItem(userId, itemId, item), userId);
     }
 
@@ -49,8 +53,10 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<OutputItemDtoWithComment> getAllItem(@RequestHeader(HEADER_USER_ID) Long userId) {
-        return itemService.getAllItem(userId)
+    public List<OutputItemDtoWithComment> getAllItem(@RequestHeader(HEADER_USER_ID) Long userId,
+                                                     @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                                     @Positive @RequestParam(defaultValue = "10") int size) {
+        return itemService.getAllItem(userId, from, size)
                 .stream()
                 .map(item -> itemMapper.toOutputItemDto(item, userId))
                 .map(itemMapper::toOutputItemDtoWithComment)
@@ -59,8 +65,10 @@ public class ItemController {
 
     @GetMapping(value = "/search")
     public List<OutputItemDto> searchItemByText(@RequestHeader(HEADER_USER_ID) Long userId,
-                                          @RequestParam String text) {
-        return itemService.searchItemByText(userId, text)
+                                                @RequestParam String text,
+                                                @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                                @Positive @RequestParam(defaultValue = "10") int size) {
+        return itemService.searchItemByText(userId, text, from, size)
                 .stream()
                 .map(item -> itemMapper.toOutputItemDto(item, userId))
                 .collect(Collectors.toList());
