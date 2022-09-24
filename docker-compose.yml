@@ -10,13 +10,6 @@ services:
       - server
     environment:
       - SHAREIT_SERVER_URL=http://server:9090
-      - DB_NAME=shareit
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=iamroot
-      - DB_HOST=db
-      - spring.datasource.url=jdbc:postgresql://db:5432/later
-      - spring.datasource.username=postgres
-      - spring.datasource.password=iamroot
 
   server:
     build: .
@@ -38,10 +31,10 @@ services:
   db:
     image: postgres:13.7-alpine
     container_name: database
-    volumes:
-      - /var/lib/postgresql/data
     ports:
       - "6541:5432"
+    volumes:
+      - /var/lib/postgresql/data
     environment:
       - POSTGRES_DB=shareit
       - POSTGRES_USER=postgres
