@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   gateway:
-    build: .
+    build: gateway
     image: shareit-gateway
     container_name: gateway
     ports:
@@ -10,9 +10,16 @@ services:
       - server
     environment:
       - SHAREIT_SERVER_URL=http://server:9090
+      - DB_NAME=shareit
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=iamroot
+      - DB_HOST=db
+      - spring.datasource.url=jdbc:postgresql://db:5432/shareit
+      - spring.datasource.username=postgres
+      - spring.datasource.password=iamroot
 
   server:
-    build: .
+    build: server
     image: shareit-server
     container_name: server
     ports:
@@ -24,7 +31,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=iamroot
       - DB_HOST=db
-      - spring.datasource.url=jdbc:postgresql://db:5432/later
+      - spring.datasource.url=jdbc:postgresql://db:5432/shareit
       - spring.datasource.username=postgres
       - spring.datasource.password=iamroot
 

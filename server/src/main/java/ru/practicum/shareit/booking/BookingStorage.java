@@ -83,7 +83,7 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
     List<Booking> findAllPastBookingsByItemId(long itemId, LocalDateTime currentDateTime);
 
     @Query("select b from Booking b " +
-            " where b.itemId = ?1 and b.bookerId = ?2 and b.end < ?3" +
+            " where b.itemId = ?1 and b.bookerId = ?2 and b.start < ?3" +
             " order by b.start desc ")
     List<Booking> findAllPastBookingsByBookerAndItemId(long itemId, long userId, LocalDateTime currentDateTime);
 
