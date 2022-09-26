@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.InputComment;
 import ru.practicum.shareit.item.dto.InputItem;
 import ru.practicum.shareit.item.dto.UpdateItem;
+import ru.practicum.shareit.validate.Create;
+import ru.practicum.shareit.validate.Update;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -26,15 +28,15 @@ public class ItemController {
 
     @PostMapping
     public ResponseEntity<Object> addItem(@RequestHeader(HEADER_USER_ID) Long userId,
-                                          @RequestBody @Valid InputItem inputItem) {
+                                          @RequestBody @Validated(Create.class) InputItem inputItem) {
         return itemClient.addItem(userId, inputItem);
     }
 
     @PatchMapping(value = "/{itemId}")
     public ResponseEntity<Object> updateItem(@RequestHeader(HEADER_USER_ID) @Positive Long userId,
                                              @PathVariable @Positive Long itemId,
-                                             @RequestBody @Valid UpdateItem updateItem) {
-        return itemClient.updateItem(userId, itemId, updateItem);
+                                             @RequestBody @Validated(Update.class) InputItem inputItem) {
+        return itemClient.updateItem(userId, itemId, inputItem);
     }
 
     @GetMapping(value = "/{itemId}")

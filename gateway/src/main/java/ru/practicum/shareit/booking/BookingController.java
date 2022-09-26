@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.exception.BookingValidateException;
 import ru.practicum.shareit.exception.UnsupportedStatusException;
 
 import javax.validation.Valid;
@@ -26,6 +27,12 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<Object> addBooking(@RequestHeader(HEADER_USER_ID) @Positive long userId,
                                              @RequestBody @Valid BookItemRequestDto requestDto) {
+        if (requestDto.getStart() == requestDto.getEnd()) {
+            throw new BookingValidateException("Время старта равно времени окончания брони");
+        }
+        if (requestDto.getStart().isAfter(requestDto.getEnd())) {
+            throw new BookingValidateException("Время старта позже времени окончания брони");
+        }
         return bookingClient.addBooking(userId, requestDto);
     }
 

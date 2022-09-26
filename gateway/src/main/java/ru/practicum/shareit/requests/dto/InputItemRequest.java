@@ -2,6 +2,7 @@ package ru.practicum.shareit.requests.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.validate.Create;
 
 import javax.validation.constraints.NotBlank;
 
@@ -9,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 public class InputItemRequest {
     @NotBlank(message = "Нет описания требуемой вещи")
-    String description;
+    private String description;
 
     public InputItemRequest(String description) {
         this.description = description;

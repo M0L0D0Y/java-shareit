@@ -1,17 +1,18 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.Data;
+import ru.practicum.shareit.validate.Create;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
 public class InputItem {
-    @NotBlank(message = "Нет названия вещи")
+    @NotBlank(groups = {Create.class}, message = "Нет названия вещи")
     private String name;
-    @NotBlank(message = "Нет описания вещи")
+    @NotBlank(groups = {Create.class},message = "Нет описания вещи")
     private String description;
-    @NotNull(message = "Нет статуса аренды")
+    @NotNull(groups = {Create.class},message = "Нет статуса аренды")
     private Boolean available;
     private Long requestId;
 

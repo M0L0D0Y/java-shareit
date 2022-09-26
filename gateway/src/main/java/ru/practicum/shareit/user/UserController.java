@@ -7,9 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.InputUser;
-import ru.practicum.shareit.user.dto.UpdateUser;
+import ru.practicum.shareit.validate.Create;
+import ru.practicum.shareit.validate.Update;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 
 
@@ -22,15 +22,15 @@ public class UserController {
     private final UserClient userClient;
 
     @PostMapping
-    public ResponseEntity<Object> addUser(@RequestBody @Valid InputUser inputUser) {
+    public ResponseEntity<Object> addUser(@RequestBody @Validated(Create.class) InputUser inputUser) {
         return userClient.addUser(inputUser);
     }
 
     @PatchMapping(value = "/{id}")
     public ResponseEntity<Object> updateUser(@PathVariable @Positive Long id,
-                                             @RequestBody @Valid UpdateUser updateUser) {
+                                             @RequestBody @Validated(Update.class) InputUser inputUser) {
 
-        return userClient.updateUser(id, updateUser);
+        return userClient.updateUser(id, inputUser);
     }
 
     @GetMapping(value = "/{id}")

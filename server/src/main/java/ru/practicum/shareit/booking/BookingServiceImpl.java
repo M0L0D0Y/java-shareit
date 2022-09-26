@@ -95,13 +95,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingsByBookerId(long userId, String state, int from, int size) {
+    public List<Booking> getBookingsByBookerId(long userId, State state, int from, int size) {
         checkExistUser(userId);
-        State getState = State.valueOf(state);
         Pageable pageable = Page.getPageable(from, size);
         LocalDateTime dateTime = LocalDateTime.now();
         List<Booking> bookings = null;
-        switch (getState) {
+        switch (state) {
             case ALL:
                 bookings = bookingStorage.findAllBookingsByBookerId(userId, pageable);
                 log.info("Найдены все брони пользователя");
@@ -130,15 +129,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingsByIdOwnerItem(long userId, String state, int from, int size) {
+    public List<Booking> getBookingsByIdOwnerItem(long userId, State state, int from, int size) {
         checkExistUser(userId);
-        State getState = State.valueOf(state);
         Pageable pageable = Page.getPageable(from, size);
         List<Booking> bookings = null;
         List<Item> items = itemStorage.findAllItemByOwnerId(userId);
         LocalDateTime currentDateTime = LocalDateTime.now();
         if (!items.isEmpty()) {
-            switch (getState) {
+            switch (state) {
                 case ALL:
                     bookings = bookingStorage.findByIdOwnerItem(userId, pageable);
                     break;
