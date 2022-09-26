@@ -8,7 +8,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.InputComment;
 import ru.practicum.shareit.item.dto.InputItem;
-import ru.practicum.shareit.item.dto.UpdateItem;
 import ru.practicum.shareit.validate.Create;
 import ru.practicum.shareit.validate.Update;
 

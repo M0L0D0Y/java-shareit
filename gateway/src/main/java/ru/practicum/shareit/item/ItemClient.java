@@ -10,7 +10,6 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.item.dto.InputComment;
 import ru.practicum.shareit.item.dto.InputItem;
-import ru.practicum.shareit.item.dto.UpdateItem;
 
 import java.util.Map;
 

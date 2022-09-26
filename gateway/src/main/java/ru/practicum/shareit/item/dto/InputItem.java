@@ -10,9 +10,9 @@ import javax.validation.constraints.NotNull;
 public class InputItem {
     @NotBlank(groups = {Create.class}, message = "Нет названия вещи")
     private String name;
-    @NotBlank(groups = {Create.class},message = "Нет описания вещи")
+    @NotBlank(groups = {Create.class}, message = "Нет описания вещи")
     private String description;
-    @NotNull(groups = {Create.class},message = "Нет статуса аренды")
+    @NotNull(groups = {Create.class}, message = "Нет статуса аренды")
     private Boolean available;
     private Long requestId;
 

@@ -17,6 +17,7 @@ public class ErrorHandler {
         log.info("Неподдерживаемый статус {}", e.getMessage());
         return new ErrorResponse("Unknown state: UNSUPPORTED_STATUS", e.getMessage());
     }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBookingValidateException(final BookingValidateException e) {
