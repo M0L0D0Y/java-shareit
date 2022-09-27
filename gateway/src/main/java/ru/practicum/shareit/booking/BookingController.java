@@ -27,12 +27,7 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<Object> addBooking(@RequestHeader(HEADER_USER_ID) @Positive long userId,
                                              @RequestBody @Valid BookItemRequestDto requestDto) {
-        if (requestDto.getStart() == requestDto.getEnd()) {
-            throw new BookingValidateException("Время старта равно времени окончания брони");
-        }
-        if (requestDto.getStart().isAfter(requestDto.getEnd())) {
-            throw new BookingValidateException("Время старта позже времени окончания брони");
-        }
+        validatedBooking(requestDto);
         return bookingClient.addBooking(userId, requestDto);
     }
 
@@ -73,5 +68,11 @@ public class BookingController {
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new UnsupportedStatusException("Unknown state: " + stateParam));
         return bookingClient.getBookingsByIdOwnerItem(userId, state, from, size);
+    }
+
+    private void validatedBooking(BookItemRequestDto requestDto) {
+        if (requestDto.getStart().isBefore(requestDto.getEnd())) {
+            throw new BookingValidateException("Время старта равно времени окончания брони");
+        }
     }
 }
