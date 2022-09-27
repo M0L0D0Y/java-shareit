@@ -71,7 +71,7 @@ public class BookingController {
     }
 
     private void validatedBooking(BookItemRequestDto requestDto) {
-        if (requestDto.getStart().isAfter(requestDto.getEnd())) {
+        if (!requestDto.getStart().isBefore(requestDto.getEnd())) {
             throw new BookingValidateException("Время старта равно или позже времени окончания брони");
         }
     }
